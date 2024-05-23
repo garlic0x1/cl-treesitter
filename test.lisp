@@ -10,4 +10,4 @@
   (let* ((parsed (ts-parser-parse-string parser (cffi:null-pointer) "1+1;" 4))
          (root (ts-tree-root-node parsed)))
     (print root)
-    (ts-node-type root)))
+    (ts-node-type (convert-to-foreign root))))

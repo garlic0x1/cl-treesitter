@@ -4,6 +4,10 @@
 
 (use-foreign-library "libtree-sitter.so")
 
+;*******************;
+;* Section - Types *;
+;*******************;
+
 (defctype ts-state-id :uint16)
 (defctype ts-symbol :uint16)
 (defctype ts-field-id :uint16)
@@ -271,6 +275,105 @@
 
 (defcfun "ts_node_prev_sibling" (:struct ts-node)
   (node (:struct ts-node)))
+
+(defcfun "ts_node_first_child_for_byte" (:struct ts-node)
+  (node (:struct ts-node))
+  (byte :uint32))
+
+(defcfun "ts_node_first_named_child_for_byte" (:struct ts-node)
+  (node (:struct ts-node))
+  (byte :uint32))
+
+(defcfun "ts_node_descendant_count" :uint32
+  (node (:struct ts-node)))
+
+(defcfun "ts_node_descendant_for_byte_range" (:struct ts-node)
+  (node (:struct ts-node))
+  (start :uint32)
+  (end :uint32))
+
+(defcfun "ts_node_descendant_for_point_range" (:struct ts-node)
+  (node (:struct ts-node))
+  (start (:struct ts-point))
+  (end (:struct ts-point)))
+
+(defcfun "ts_node_named_descendant_for_byte_range" (:struct ts-node)
+  (node (:struct ts-node))
+  (start :uint32)
+  (end :uint32))
+
+(defcfun "ts_node_named_descendant_for_point_range" (:struct ts-node)
+  (node (:struct ts-node))
+  (start (:struct ts-point))
+  (end (:struct ts-point)))
+
+(defcfun "ts_node_edit" :void
+  (node (:pointer (:struct ts-node)))
+  (edit :pointer))
+
+(defcfun "ts_node_eq" :bool
+  (node (:struct ts-node))
+  (other (:struct ts-node)))
+
+;************************;
+;* Section - TreeCursor *;
+;************************;
+
+(defcfun "ts_tree_cursor_new" (:struct ts-tree-cursor)
+  (node (:struct ts-node)))
+
+(defcfun "ts_tree_cursor_delete" :void
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_reset" :void
+  (cursor (:pointer (:struct ts-tree-cursor)))
+  (node (:struct ts-node)))
+
+(defcfun "ts_tree_cursor_reset_to" :void
+  (dst (:pointer (:struct ts-tree-cursor)))
+  (src (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_current_node" (:struct ts-node)
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_current_field_name" :string
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_current_field_id" ts-field-id
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_parent" :bool
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_next_sibling" :bool
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_previous_sibling" :bool
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_first_child" :bool
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_last_child" :bool
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_descendant" :bool
+  (cursor (:pointer (:struct ts-tree-cursor)))
+  (goal-descendant-index :uint32))
+
+(defcfun "ts_tree_cursor_current_descendant_index" :uint32
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_current_depth" :uint32
+  (cursor (:pointer (:struct ts-tree-cursor))))
+
+(defcfun "ts_tree_cursor_goto_first_child_for_byte" :uint64
+  (cursor (:pointer (:struct ts-tree-cursor)))
+  (goal-byte :uint32))
+
+(defcfun "ts_tree_cursor_goto_first_child_for_point" :uint64
+  (cursor (:pointer (:struct ts-tree-cursor)))
+  (goal-point (:struct ts-point)))
 
 ;**********************;
 ;* Section - Language *;
