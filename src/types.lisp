@@ -1,66 +1,40 @@
+(defpackage :treesitter/types
+  (:use :cl)
+  (:export :foreign-object
+           :foreign-object-pointer
+           :foreign-object-free
+           :foreign-object-gc
+           :ts-language
+           :ts-parser
+           :ts-tree
+           :ts-node
+           :ts-cursor))
 (in-package :treesitter)
 
-(defctype ts-state-id :uint16)
-(defctype ts-symbol :uint16)
-(defctype ts-field-id :uint16)
+(defclass foreign-object ()
+  ((pointer
+    :initarg :pointer
+    :initform (error "Must provide :pointer")
+    :accessor foreign-object-pointer)
+   (free
+    :initarg :free
+    :initform (error "Must provide :free")
+    :accessor foreign-object-free)
+   (gc
+    :initarg :gc
+    :initform t
+    :accessor foreign-object-gc)))
 
-(defcenum ts-input-encoding
-  +ts-input-encoding-utf8+
-  +ts-input-encoding-utf16+)
+(defmethod initialize-instance :after ((self foreign-object) &key &allow-other-keys)
+  (when (foreign-object-gc self)
+    (let ((pointer (foreign-object-pointer self))
+          (free (foreign-object-free self)))
+      (unless pointer (error ":pointer is nil."))
+      (unless free (error ":free is nil."))
+      (tg:finalize self (lambda () (funcall free pointer))))))
 
-(defcenum ts-symbol-type
-  +ts-symbol-type-regular+
-  +ts-symbol-type-anonymous+
-  +ts-symbol-type-auxiliary+)
-
-(defcenum ts-log-type
-  +ts-log-type-parse+
-  +ts-log-type-lex+)
-
-(defcstruct ts-point
-  (row :uint32)
-  (column :uint32))
-
-(defcenum ts-quantifier
-  +ts-quantifier-zero+
-  +ts-quantifier-zero-or-one+
-  +ts-quantifier-zero-or-more+
-  +ts-quantifier-one+
-  +ts-quantifier-one-or-more+)
-
-(defcstruct ts-range
-  (start-point (:struct ts-point))
-  (end-point (:struct ts-point))
-  (start-byte :uint32)
-  (end-byte :uint32))
-
-(defcstruct ts-input
-  (payload :pointer)
-  (read :pointer)
-  (encoding :int))
-
-(defcstruct ts-logger
-  (payload :pointer)
-  (log :pointer))
-
-(defcstruct ts-input-edit
-  (start-byte :uint32)
-  (old-end-byte :uint32)
-  (new-end-byte :uint32)
-  (start-point (:struct ts-point))
-  (old-end-point (:struct ts-point))
-  (new-end-point (:struct ts-point)))
-
-(defcstruct ts-node
-  (context :uint32 :count 4)
-  (id :pointer)
-  (tree :pointer))
-
-(defcstruct ts-tree-cursor
-  (tree :pointer)
-  (id :pointer)
-  (context :uint32 :count 3))
-
-(defcstruct ts-query-capture
-  (node (:struct ts-node))
-  (index :uint32))
+(defclass ts-language (foreign-object) ())
+(defclass ts-parser (foreign-object) ())
+(defclass ts-tree (foreign-object) ())
+(defclass ts-node (foreign-object) ())
+(defclass ts-cursor (foreign-object) ())

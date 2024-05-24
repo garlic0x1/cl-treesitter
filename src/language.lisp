@@ -1,60 +1,23 @@
 (in-package :treesitter)
 
-(defcfun "ts_language_copy" :pointer
-  (language :pointer))
+(defvar *ts-registry* (make-hash-table :test #'equal))
 
-(defcfun "ts_language_delete" :void
-  (language :pointer))
-
-(defcfun "ts_language_symbol_count" :uint32
-  (language :pointer))
-
-(defcfun "ts_language_state_count" :uint32
-  (language :pointer))
-
-(defcfun "ts_language_symbol_name" :string
-  (language :pointer)
-  (symbol ts-symbol))
-
-(defcfun "ts_language_symbol_for_name" ts-symbol
-  (language :pointer)
-  (string :string)
-  (length :uint32)
-  (named-p :bool))
-
-(defcfun "ts_language_field_count" :uint32
-  (language :pointer))
-
-(defcfun "ts_language_field_name_for_id" :string
-  (language :pointer)
-  (id ts-field-id))
-
-(defcfun "ts_language_field_id_for_name" ts-field-id
-  (language :pointer)
-  (name :string)
-  (length :uint32))
-
-(defcfun "ts_language_symbol_type" ts-symbol-type
-  (language :pointer)
-  (symbol ts-symbol))
-
-(defcfun "ts_language_version" :uint32
-  (language :pointer))
-
-(defcfun "ts_language_next_state" ts-state-id
-  (language :pointer)
-  (state ts-state-id)
-  (symbol ts-symbol))
-
-(defmacro ts-use-library (lang)
+(defmacro ts-use-library (lang-spec)
   `(progn
-     (use-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang))
-     (defcfun ,(format nil "tree_sitter_~(~a~)" lang) :pointer)))
+     (use-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang-spec))
+     (defcfun ,(format nil "tree_sitter_~(~a~)" lang-spec) :pointer)
+     (setf (gethash ,lang-spec *ts-registry*)
+           (intern (string-upcase (format nil "tree-sitter-~a" lang-spec))))))
 
-(defun ts-language-new (lang)
-  (funcall (intern (string-upcase (format nil "tree-sitter-~a" lang)))))
+(defun ts-language-new (lang-spec)
+  (let ((constructor (gethash lang-spec *ts-registry*)))
+    (if constructor
+        (funcall constructor)
+        (progn
+          (ts-use-library lang-spec)
+          (ts-language-new lang-spec)))))
 
-(defmacro with-ts-language ((lang lang-string) &body body)
-  `(let ((,lang (ts-language-new ,lang-string)))
-     (unwind-protect (progn ,@body)
-       (ts-language-delete ,lang))))
+(defun make-ts-language (lang-spec)
+  (make-instance 'ts-language
+                 :pointer (ts-language-new lang-spec)
+                 :free #'ts/ffi::ts-language-delete))
