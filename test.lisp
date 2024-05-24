@@ -16,4 +16,10 @@
   (let* ((parsed (ts-parser-parse-string parser (cffi:null-pointer) "1+1;" 4))
          (root (ts-tree-root-node parsed)))
     (print root)
-    (ts-node-string root)))
+    (ts-node-string root)
+
+    ;; you have to manually clean up for now
+    (ts-node-delete root)
+    (ts-tree-delete parsed)
+    (ts-language-delete language)
+    (ts-parser-delete parser)))
