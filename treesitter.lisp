@@ -4,6 +4,12 @@
 
 (use-foreign-library "libtree-sitter.so")
 
+(define-foreign-library
+    (shim :search-path (asdf:system-relative-pathname :cl-treesitter ""))
+  (t (:default "shim")))
+
+(use-foreign-library shim)
+
 ;*******************;
 ;* Section - Types *;
 ;*******************;
@@ -150,10 +156,10 @@
 (defcfun "ts_tree_delete" :void
   (tree :pointer))
 
-(defcfun "ts_tree_root_node" (:struct ts-node)
+(defcfun ("ts_tree_root_node_" ts-tree-root-node) (:pointer (:struct ts-node))
   (tree :pointer))
 
-(defcfun "ts_tree_root_node_with_offset" (:struct ts-node)
+(defcfun ("ts_tree_root_node_with_offset_" ts-tree-root-node-with-offset) (:pointer (:struct ts-node))
   (tree :pointer)
   (offset-bytes :uint32)
   (offset-extent (:struct ts-point)))
@@ -182,128 +188,128 @@
 ;* Section - Node *;
 ;******************;
 
-(defcfun "ts_node_type" :string
-  (node (:struct ts-node)))
+(defcfun ("ts_node_type_" ts-node-type) :string
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_symbol" ts-symbol
-  (node (:struct ts-node)))
+(defcfun ("ts_node_symbol_" ts_node_symbol) ts-symbol
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_language" :pointer
-  (node (:struct ts-node)))
+(defcfun ("ts_node_language_" ts-node-language) :pointer
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_grammar_type" :string
-  (node (:struct ts-node)))
+(defcfun ("ts_node_grammar_type_" ts-node-grammar-type) :string
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_grammar_symbol" ts-symbol
-  (node (:struct ts-node)))
+(defcfun ("ts_node_grammar_symbol_" ts-node-grammar-symbol) ts-symbol
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_start_byte" :uint32
-  (node (:struct ts-node)))
+(defcfun ("ts_node_start_byte_" ts-node-start-byte) :uint32
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_start_point" (:struct ts-point)
-  (node (:struct ts-node)))
+(defcfun ("ts_node_start_point_" ts-node-start-point) (:struct ts-point)
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_end_byte" :uint32
-  (node (:struct ts-node)))
+(defcfun ("ts_node_end_byte_" ts-node-end-byte) :uint32
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_end_point" (:struct ts-point)
-  (node (:struct ts-node)))
+(defcfun ("ts_node_end_point_" ts-node-end-point) (:struct ts-point)
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_string" :string
-  (node (:struct ts-node)))
+(defcfun ("ts_node_string_" ts-node-string) :string
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_is_null" :bool
-  (node (:struct ts-node)))
+(defcfun ("ts_node_is_null_" ts-node-is-null) :bool
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_is_named" :bool
-  (node (:struct ts-node)))
+(defcfun ("ts_node_is_named_" ts-node-is-named) :bool
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_is_extra" :bool
-  (node (:struct ts-node)))
+(defcfun ("ts_node_is_extra_" ts-node-is-extra) :bool
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_has_changes" :bool
-  (node (:struct ts-node)))
+(defcfun ("ts_node_has_changes_" ts-node-has-changes) :bool
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_has_error" :bool
-  (node (:struct ts-node)))
+(defcfun ("ts_node_has_error_" ts-node-has-error) :bool
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_is_error" :bool
-  (node (:struct ts-node)))
+(defcfun ("ts_node_is_error_" ts-node-is-error) :bool
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_parse_state" :int
-  (node (:struct ts-node)))
+(defcfun ("ts_node_parse_state_" ts-node-parse-state) :int
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_next_parse_state" :int
-  (node (:struct ts-node)))
+(defcfun ("ts_node_next_parse_state_" ts-node-next-parse-state) :int
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_parent" (:struct ts-node)
-  (node (:struct ts-node)))
+(defcfun ("ts_node_parent_" ts-node-parent) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_child_containing_descendant" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_child_containing_descendant_" ts-node-child-containint-descendant) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (descendant (:struct ts-node)))
 
-(defcfun "ts_node_child" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_child_" ts-node-child) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (child-index :uint32))
 
-(defcfun "ts_node_field_name_for_child" :string
-  (node (:struct ts-node))
+(defcfun ("ts_node_field_name_for_child_" ts-node-field-name-for-child) :string
+  (node (:pointer (:struct ts-node)))
   (child-index :uint32))
 
-(defcfun "ts_node_child_count" :uint32
-  (node (:struct ts-node)))
+(defcfun ("ts_node_child_count_" ts-node-child-count) :uint32
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_named_child" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_named_child_" ts-node-named-child) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (child-index :uint32))
 
-(defcfun "ts_node_named_child_count" :uint32
-  (node (:struct ts-node)))
+(defcfun ("ts_node_named_child_count_" ts-node-named-child-count) :uint32
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_child_by_field_name" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_child_by_field_name_" ts-node-child-by-field-name) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (name :string)
   (name-length :uint32))
 
-(defcfun "ts_node_child_by_field_id" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_child_by_field_id_" ts-node-child-by-field-id) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (field-id ts-field-id))
 
-(defcfun "ts_node_next_sibling" (:struct ts-node)
-  (node (:struct ts-node)))
+(defcfun ("ts_node_next_sibling_" ts-node-next-sibling) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_prev_sibling" (:struct ts-node)
-  (node (:struct ts-node)))
+(defcfun ("ts_node_prev_sibling_" ts-node-prev-sibling) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_first_child_for_byte" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_first_child_for_byte_" ts-node-first-child-for-byte) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (byte :uint32))
 
-(defcfun "ts_node_first_named_child_for_byte" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_first_named_child_for_byte_" ts-node-first-named-child-for-byte) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (byte :uint32))
 
-(defcfun "ts_node_descendant_count" :uint32
-  (node (:struct ts-node)))
+(defcfun ("ts_node_descendant_count_" ts-node-descendant-count) :uint32
+  (node (:pointer (:struct ts-node))))
 
-(defcfun "ts_node_descendant_for_byte_range" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_descendant_for_byte_range_" ts-node-descendant-for-byte-range) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (start :uint32)
   (end :uint32))
 
-(defcfun "ts_node_descendant_for_point_range" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_descendant_for_point_range_" ts-node-descendant-for-point-range) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (start (:struct ts-point))
   (end (:struct ts-point)))
 
-(defcfun "ts_node_named_descendant_for_byte_range" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_named_descendant_for_byte_range_" ts-node-named-descendant-for-byte-range) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (start :uint32)
   (end :uint32))
 
-(defcfun "ts_node_named_descendant_for_point_range" (:struct ts-node)
-  (node (:struct ts-node))
+(defcfun ("ts_node_named_descendant_for_point_range_" ts-node-named-descendant-for-point-range) (:pointer (:struct ts-node))
+  (node (:pointer (:struct ts-node)))
   (start (:struct ts-point))
   (end (:struct ts-point)))
 
@@ -311,9 +317,12 @@
   (node (:pointer (:struct ts-node)))
   (edit :pointer))
 
-(defcfun "ts_node_eq" :bool
-  (node (:struct ts-node))
-  (other (:struct ts-node)))
+(defcfun ("ts_node_eq_" ts-node-eq) :bool
+  (node (:pointer (:struct ts-node)))
+  (other (:pointer (:struct ts-node))))
+
+(defcfun ts-node-delete :void
+  (node (:pointer (:struct ts-node))))
 
 ;************************;
 ;* Section - TreeCursor *;

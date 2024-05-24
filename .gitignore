@@ -1,0 +1,12 @@
+# IDE
+.DS_Store
+.idea
+*.log
+tmp/
+
+# Binaries
+
+# Compiled objects
+*.fasl
+*.lx64fsl
+*.so
