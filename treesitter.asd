@@ -12,3 +12,8 @@
   :depends-on (:cffi)
   :components ((:c-source-file "shim")
                (:file "treesitter")))
+
+(asdf:defsystem "treesitter/test"
+  :depends-on (:fiveam :treesitter)
+  :components ((:module "t"
+                :components ((:file "test")))))

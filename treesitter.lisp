@@ -73,6 +73,8 @@
    :ts-node-child-by-field-id
    :ts-node-next-sibling
    :ts-node-prev-sibling
+   :ts-node-next-named-sibling
+   :ts-node-prev-named-sibling
    :ts-node-first-child-for-byte
    :ts-node-first-named-child-for-byte
    :ts-node-descendant-count
@@ -295,7 +297,7 @@ are three possible reasons for failure:
   (old-tree :pointer)
   (input (:pointer (:struct ts-input))))
 
-(defcfun ("ts_parser_parse_string" ts-parser-parse-string*) :pointer
+(defcfun ("ts_parser_parse_string" ts-parser-parse-string) :pointer
   "Use the parser to parse some source code stored in one contiguous buffer.
 The first two parameters are the same as in the [`ts_parser_parse`] function
 above. The second two parameters indicate the location of the buffer and its
@@ -857,5 +859,3 @@ completion suggestions or valid symbols in error nodes. Use
   (language :pointer)
   (state ts-state-id)
   (symbol ts-symbol))
-
-; my fingers hurt
