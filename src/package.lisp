@@ -13,8 +13,6 @@
    ;; language.lisp
    :ts-use-language
    :with-ts-language
-   :ts-language-new
-   :ts-language-delete
    ;; tree.lisp
    :with-ts-tree-root-node
    :with-ts-tree-root-node-with-offset
