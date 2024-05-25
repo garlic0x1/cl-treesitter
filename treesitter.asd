@@ -13,11 +13,13 @@
 (asdf:defsystem "treesitter"
   :author "garlic0x1"
   :license "MIT"
-  :depends-on (:cffi)
+  :depends-on (:cffi :trivial-garbage)
   :components ((:c-source-file "shim")
+               (:file "bindings")
                (:file "treesitter")))
 
 (asdf:defsystem "treesitter/test"
   :depends-on (:fiveam :treesitter)
   :components ((:module "t"
-                :components ((:file "test")))))
+                :components ((:file "bindings")
+                             (:file "treesitter")))))

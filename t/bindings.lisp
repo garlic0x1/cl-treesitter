@@ -1,10 +1,10 @@
-(defpackage :treesitter/test
-  (:use :cl :fiveam :treesitter))
-(in-package :treesitter/test)
+(defpackage :treesitter/test/bindings
+  (:use :cl :fiveam :treesitter/bindings))
+(in-package :treesitter/test/bindings)
 
-(def-suite :treesitter
-  :description "Tests for treesitter")
-(in-suite :treesitter)
+(def-suite :treesitter/bindings
+  :description "Tests for treesitter low-level bindings.")
+(in-suite :treesitter/bindings)
 
 (cffi:use-foreign-library "libtree-sitter-c.so")
 (cffi:defcfun "tree_sitter_c" :pointer)

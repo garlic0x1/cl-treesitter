@@ -17,3 +17,7 @@ These are low-level bindings, you need to clean up resources with the `ts-*-dele
   (ts-tree-delete tree)
   (ts-parser-delete parser))
 ```
+
+```lisp
+"(translation_unit (expression_statement (update_expression argument: (binary_expression left: (number_literal) right: (number_literal)) operator: (MISSING \"--\"))))" ; No value
+```
