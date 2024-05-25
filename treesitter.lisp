@@ -14,6 +14,14 @@
    :+ts-quantifier-zero-or-more+
    :+ts-quantifier-one+
    :+ts-quantifier-one-or-more+
+   :ts-point
+   :ts-range
+   :ts-input
+   :ts-logger
+   :ts-input-edit
+   :ts-node
+   :ts-tree-cursor
+   :ts-query-capture
    ;; parser
    :ts-parser-new
    :ts-parser-delete

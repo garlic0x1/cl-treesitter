@@ -1,10 +1,14 @@
-(defmethod asdf:perform ((op asdf:load-op) (obj asdf:c-source-file)) t)
+(ql:quickload :cffi-toolchain)
 
-(defmethod asdf:perform ((op asdf:compile-op) (obj asdf:c-source-file))
-  (uiop:with-current-directory ((asdf:system-relative-pathname :treesitter ""))
-    (with-slots ((name asdf/component:name)) obj
-      (uiop:run-program
-       (format nil "gcc -ltree-sitter -shared -o ~a.so ~a.c" name name)))))
+(defclass c-source-file (asdf:source-file) ())
+
+(defmethod asdf:perform ((op asdf:load-op) (obj c-source-file)) t)
+
+(defmethod asdf:perform ((op asdf:compile-op) (obj c-source-file))
+  (with-slots ((name asdf/component:absolute-pathname)) obj
+    (cffi-toolchain:link-shared-library
+     (format nil "~a.so" name)
+     (list (format nil "~a.c" name)))))
 
 (asdf:defsystem "treesitter"
   :author "garlic0x1"

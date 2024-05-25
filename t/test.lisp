@@ -10,6 +10,7 @@
 (cffi:defcfun "tree_sitter_c" :pointer)
 
 (test :basic
+  "Ensure parsing strings works."
   (let ((lang (tree-sitter-c))
         (parser (ts-parser-new)))
     (unwind-protect
