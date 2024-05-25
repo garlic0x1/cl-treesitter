@@ -9,14 +9,19 @@
 TSNode *ts_tree_root_node_(const TSTree *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_tree_root_node(self);
+	if (node)
+		*node = ts_tree_root_node(self);
 	return node;
 }
 
-TSNode *ts_tree_root_node_with_offset_(const TSTree *self, uint32_t offset_bytes, TSPoint offset_extent)
+TSNode *ts_tree_root_node_with_offset_(const TSTree *self,
+				       uint32_t offset_bytes,
+				       TSPoint offset_extent)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_tree_root_node_with_offset(self, offset_bytes, offset_extent);
+	if (node)
+		*node = ts_tree_root_node_with_offset(self, offset_bytes,
+						      offset_extent);
 	return node;
 }
 
@@ -122,21 +127,24 @@ TSStateId ts_node_next_parse_state_(TSNode *self)
 TSNode *ts_node_parent_(TSNode *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_parent(*self);
+	if (node)
+		*node = ts_node_parent(*self);
 	return node;
 }
 
 TSNode *ts_node_child_containing_descendant_(TSNode *self, TSNode *descendant)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_child_containing_descendant(*self, *descendant);
+	if (node)
+		*node = ts_node_child_containing_descendant(*self, *descendant);
 	return node;
 }
 
 TSNode *ts_node_child_(TSNode *self, uint32_t child_index)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_child(*self, child_index);
+	if (node)
+		*node = ts_node_child(*self, child_index);
 	return node;
 }
 
@@ -153,7 +161,8 @@ uint32_t ts_node_child_count_(TSNode *self)
 TSNode *ts_node_named_child_(TSNode *self, uint32_t child_index)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_named_child(*self, child_index);
+	if (node)
+		*node = ts_node_named_child(*self, child_index);
 	return node;
 }
 
@@ -165,49 +174,56 @@ uint32_t ts_node_named_child_count_(TSNode *self)
 TSNode *ts_node_child_by_field_id_(TSNode *self, TSFieldId field_id)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_child_by_field_id(*self, field_id);
+	if (node)
+		*node = ts_node_child_by_field_id(*self, field_id);
 	return node;
 }
 
 TSNode *ts_node_next_sibling_(TSNode *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_next_sibling(*self);
+	if (node)
+		*node = ts_node_next_sibling(*self);
 	return node;
 }
 
 TSNode *ts_node_prev_sibling_(TSNode *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_prev_sibling(*self);
+	if (node)
+		*node = ts_node_prev_sibling(*self);
 	return node;
 }
 
 TSNode *ts_node_next_named_sibling_(TSNode *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_next_named_sibling(*self);
+	if (node)
+		*node = ts_node_next_named_sibling(*self);
 	return node;
 }
 
 TSNode *ts_node_prev_named_sibling_(TSNode *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_prev_named_sibling(*self);
+	if (node)
+		*node = ts_node_prev_named_sibling(*self);
 	return node;
 }
 
 TSNode *ts_node_first_child_for_byte_(TSNode *self, uint32_t byte)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_first_child_for_byte(*self, byte);
+	if (node)
+		*node = ts_node_first_child_for_byte(*self, byte);
 	return node;
 }
 
 TSNode *ts_node_first_named_child_for_byte_(TSNode *self, uint32_t byte)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_first_named_child_for_byte(*self, byte);
+	if (node)
+		*node = ts_node_first_named_child_for_byte(*self, byte);
 	return node;
 }
 
@@ -216,31 +232,41 @@ uint32_t ts_node_descendant_count_(TSNode *self)
 	return ts_node_descendant_count(*self);
 }
 
-TSNode *ts_node_descendant_for_byte_range_(TSNode *self, uint32_t start, uint32_t end)
+TSNode *ts_node_descendant_for_byte_range_(TSNode *self, uint32_t start,
+					   uint32_t end)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_descendant_for_byte_range(*self, start, end);
+	if (node)
+		*node = ts_node_descendant_for_byte_range(*self, start, end);
 	return node;
 }
 
-TSNode *ts_node_descendant_for_point_range_(TSNode *self, TSPoint start, TSPoint end)
+TSNode *ts_node_descendant_for_point_range_(TSNode *self, TSPoint start,
+					    TSPoint end)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_descendant_for_point_range(*self, start, end);
+	if (node)
+		*node = ts_node_descendant_for_point_range(*self, start, end);
 	return node;
 }
 
-TSNode *ts_node_named_descendant_for_byte_range_(TSNode *self, uint32_t start, uint32_t end)
+TSNode *ts_node_named_descendant_for_byte_range_(TSNode *self, uint32_t start,
+						 uint32_t end)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_named_descendant_for_byte_range(*self, start, end);
+	if (node)
+		*node = ts_node_named_descendant_for_byte_range(*self, start,
+								end);
 	return node;
 }
 
-TSNode *ts_node_named_descendant_for_point_range_(TSNode *self, TSPoint start, TSPoint end)
+TSNode *ts_node_named_descendant_for_point_range_(TSNode *self, TSPoint start,
+						  TSPoint end)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_node_named_descendant_for_point_range(*self, start, end);
+	if (node)
+		*node = ts_node_named_descendant_for_point_range(*self, start,
+								 end);
 	return node;
 }
 
@@ -261,7 +287,8 @@ void ts_node_delete(TSNode *self)
 TSTreeCursor *ts_tree_cursor_new_(TSNode *node)
 {
 	TSTreeCursor *cursor = malloc(sizeof(TSTreeCursor));
-	if (cursor) *cursor = ts_tree_cursor_new(*node);
+	if (cursor)
+		*cursor = ts_tree_cursor_new(*node);
 	return cursor;
 }
 
@@ -273,6 +300,7 @@ void ts_tree_cursor_reset_(TSTreeCursor *self, TSNode *node)
 TSNode *ts_tree_cursor_current_node_(const TSTreeCursor *self)
 {
 	TSNode *node = malloc(sizeof(TSNode));
-	if (node) *node = ts_tree_cursor_current_node(self);
+	if (node)
+		*node = ts_tree_cursor_current_node(self);
 	return node;
 }

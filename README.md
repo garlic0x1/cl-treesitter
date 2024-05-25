@@ -1,28 +1,21 @@
 Common Lisp bindings for libtree-sitter
 
-# Installation
-
-You will have to run `make` to build the shim.
-
-```bash
-git clone https://github.com/garlic0x1/cl-treesitter
-cd cl-treesitter
-make
-```
-
-# Memory management
-
-Allocations are hidden behind `with-*` macros, so you don't have to worry about it unless you use internal functions.
+These are low-level bindings, you need to clean up resources with the `ts-*-delete` functions after creating them.
 
 # Example
 
 ```lisp
-;; Load the C parser
-(ts-use-library "c")
+(cffi:use-foreign-library "libtree-sitter-c.so")
+(cffi:defcfun "tree_sitter_c" :pointer)
 
-;; Create a parser, tree, and node, then print that node
-(with-ts-parser (parser "c")
-  (with-ts-tree (tree parser "1+1;")
-    (with-ts-tree-root-node (node tree)
-      (print (ts-node-string node)))))
+(let ((lang (tree-sitter-c))
+     (parser (ts-parser-new)))
+ (ts-parser-set-language parser lang)
+ (let* ((tree (ts-parser-parse-string parser (cffi:null-pointer) "1+1;" 4))
+        (root (ts-tree-root-node tree)))
+   (is (ts-node-string root))
+   (ts-node-delete root)
+   (ts-tree-delete tree)
+   (ts-language-delete lang)
+   (ts-parser-delete parser)))
 ```
