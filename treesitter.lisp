@@ -207,8 +207,14 @@
 ;* Section - Parser *;
 ;********************;
 
-(defcfun "ts_parser_new" :pointer
-  "Create a new parser.")
+(defun ts-parser-new (&key language timeout cancellation logger)
+  "Create a new parser."
+  (let ((parser (foreign-funcall "ts_parser_new" (:pointer))))
+    (when language (ts-parser-set-language parser language))
+    (when timeout (ts-parser-set-timeout-micros parser timeout))
+    (when cancellation (ts-parser-set-cancellation-flag parser cancellation))
+    (when logger (ts-parser-set-logger parser logger))
+    parser))
 
 (defcfun "ts_parser_delete" :void
   "Delete the parser, freeing all of the memory that it used."
@@ -305,26 +311,31 @@ are three possible reasons for failure:
   (old-tree :pointer)
   (input (:pointer (:struct ts-input))))
 
-(defcfun ("ts_parser_parse_string" ts-parser-parse-string) :pointer
+(defun ts-parser-parse-string (parser string &optional (old-tree (null-pointer)))
   "Use the parser to parse some source code stored in one contiguous buffer.
 The first two parameters are the same as in the [`ts_parser_parse`] function
 above. The second two parameters indicate the location of the buffer and its
 length in bytes."
-  (parser :pointer)
-  (old-tree :pointer)
-  (string :string)
-  (length :uint32))
+  (foreign-funcall "ts_parser_parse_string"
+                   :pointer parser
+                   :pointer old-tree
+                   :string string
+                   :uint32 (length string)
+                   :pointer))
 
-(defcfun "ts_parser_parse_string_encoded" :pointer
+(defun ts-parser-parse-string-encoded
+    (parser string encoding &optional (old-tree (null-pointer)))
   "Use the parser to parse some source code stored in one contiguous buffer with
 a given encoding. The first four parameters work the same as in the
 [`ts_parser_parse_string`] method above. The final parameter indicates whether
 the text is encoded as UTF8 or UTF16."
-  (parser :pointer)
-  (old-tree :pointer)
-  (string :string)
-  (length :uint32)
-  (encoding :int))
+  (foreign-funcall "ts_parser_parse_string_encoded"
+                   :pointer parser
+                   :pointer old-tree
+                   :string string
+                   :uint32 (length string)
+                   :int encoding
+                   :pointer))
 
 (defcfun "ts_parser_reset" :void
   "Instruct the parser to start the next parse from the beginning.
@@ -674,7 +685,7 @@ after an edit."
 ;* Section - TreeCursor *;
 ;************************;
 
-(defcfun "ts_tree_cursor_new" (:pointer (:struct ts-tree-cursor))
+(defcfun ("ts_tree_cursor_new_" ts-tree-cursor-new) (:pointer (:struct ts-tree-cursor))
   "Create a new tree cursor starting from the given node.
 
 A tree cursor allows you to walk a syntax tree more efficiently than is
