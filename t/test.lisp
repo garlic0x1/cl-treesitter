@@ -13,11 +13,11 @@
   "Ensure parsing strings works."
   (let ((lang (tree-sitter-c))
         (parser (ts-parser-new)))
-    (unwind-protect
-         (progn
-           (ts-parser-set-language parser lang)
-           (let* ((tree (ts-parser-parse-string parser (cffi:null-pointer) "1+1;" 4))
-                  (root (ts-tree-root-node tree)))
-             (is (ts-node-string root))))
+    (ts-parser-set-language parser lang)
+    (let* ((tree (ts-parser-parse-string parser (cffi:null-pointer) "1+1;" 4))
+           (root (ts-tree-root-node tree)))
+      (is (ts-node-string root))
+      (ts-node-delete root)
+      (ts-tree-delete tree)
       (ts-language-delete lang)
       (ts-parser-delete parser))))
