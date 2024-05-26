@@ -343,3 +343,19 @@ uint64_t ts_tree_cursor_goto_first_child_for_point_(TSTreeCursor *self,
 {
 	return ts_tree_cursor_goto_first_child_for_point(self, *goal_point);
 }
+
+/*******************/
+/* Section - Query */
+/*******************/
+
+void ts_query_cursor_exec_(TSQueryCursor *self, const TSQuery *query,
+			   TSNode *node)
+{
+	ts_query_cursor_exec(self, query, *node);
+}
+
+void ts_query_cursor_set_point_range_(TSQueryCursor *self, TSPoint *start_point,
+				      TSPoint *end_point)
+{
+	ts_query_cursor_set_point_range(self, *start_point, *end_point);
+}

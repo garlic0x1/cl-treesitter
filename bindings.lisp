@@ -834,6 +834,15 @@ if no such child was found."
 ;*******************/
 
 (defcfun "ts_query_new" :pointer
+  "Create a new query from a string containing one or more S-expression
+patterns. The query is associated with a particular language, and can
+only be run on syntax nodes parsed with that language.
+
+If all of the given patterns are valid, this returns a [`TSQuery`].
+If a pattern is invalid, this returns `NULL`, and provides two pieces
+of information about the problem:
+1. The byte offset of the error is written to the `error_offset` parameter.
+2. The type of error is written to the `error_type` parameter."
   (language :pointer)
   (source :string)
   (source-len :uint32)
@@ -841,9 +850,11 @@ if no such child was found."
   (error-type :pointer))
 
 (defcfun "ts_query_delete" :void
+  "Delete a query, freeing all of the memory that it used."
   (query :pointer))
 
 (defcfun "ts_query_pattern_count" :uint32
+  "Get the number of patterns, captures, or string literals in the query."
   (query :pointer))
 
 (defcfun "ts_query_capture_count" :uint32
@@ -853,36 +864,68 @@ if no such child was found."
   (query :pointer))
 
 (defcfun "ts_query_start_byte_for_pattern" :uint32
+  "Get the byte offset where the given pattern starts in the query's source.
+
+This can be useful when combining queries by concatenating their source
+code strings."
   (query :pointer)
   (pattern-index :uint32))
 
 (defcfun "ts_query_predicates_for_pattern" :pointer
+  "Get all of the predicates for the given pattern in the query.
+
+The predicates are represented as a single array of steps. There are three
+types of steps in this array, which correspond to the three legal values for
+the `type` field:
+- `TSQueryPredicateStepTypeCapture` - Steps with this type represent names
+   of captures. Their `value_id` can be used with the
+  [`ts_query_capture_name_for_id`] function to obtain the name of the capture.
+- `TSQueryPredicateStepTypeString` - Steps with this type represent literal
+   strings. Their `value_id` can be used with the
+   [`ts_query_string_value_for_id`] function to obtain their string value.
+- `TSQueryPredicateStepTypeDone` - Steps with this type are *sentinels*
+   that represent the end of an individual predicate. If a pattern has two
+   predicates, then there will be two steps with this `type` in the array."
   (query :pointer)
   (pattern-index :uint32)
   (step-count :uint32))
 
 (defcfun "ts_query_is_pattern_rooted" :bool
+  "Check if the given pattern in the query has a single root node."
   (query :pointer)
   (pattern-index :uint32))
 
 (defcfun "ts_query_is_pattern_non_local" :bool
+  "Check if the given pattern in the query is 'non local'.
+
+A non-local pattern has multiple root nodes and can match within a
+repeating sequence of nodes, as specified by the grammar. Non-local
+patterns disable certain optimizations that would otherwise be possible
+when executing a query on a specific range of a syntax tree."
   (query :pointer)
   (pattern-index :uint32))
 
 (defcfun "ts_query_is_pattern_guaranteed_at_step" :bool
+  "Check if a given pattern is guaranteed to match once a given step is reached.
+The step is specified by its byte offset in the query's source code."
   (query :pointer)
   (byte-offset :uint32))
 
 (defcfun "ts_query_capture_name_for_id" :string
+  "Get the name and length of one of the query's captures, or one of the
+query's string literals. Each capture and string is associated with a
+numeric id based on the order that it appeared in the query's source."
   (query :pointer)
   (index :uint32)
   (length :pointer))
 
-;; TODO
-;; (defcfun "ts_query_capture_capture_quantifier_for_id" :string
-;;   (query :pointer)
-;;   (index :uint32)
-;;   (length :pointer))
+;; ?
+(defcfun "ts_query_capture_capture_quantifier_for_id" :int
+  "Get the quantifier of the query's captures. Each capture is * associated
+with a numeric id based on the order that it appeared in the query's source."
+  (query :pointer)
+  (pattern_index :uint32)
+  (capture_index :uint32))
 
 (defcfun "ts_query_capture_string_value_for_id" :string
   (query :pointer)
@@ -890,23 +933,54 @@ if no such child was found."
   (length :pointer))
 
 (defcfun "ts_query_disable_capture" :void
+  "Disable a certain capture within a query.
+
+This prevents the capture from being returned in matches, and also avoids
+any resource usage associated with recording the capture. Currently, there
+is no way to undo this."
   (query :pointer)
   (name :string)
   (length :uint32))
 
 (defcfun "ts_query_disable_pattern" :void
+  "Disable a certain pattern within a query.
+
+This prevents the pattern from matching and removes most of the overhead
+associated with the pattern. Currently, there is no way to undo this."
   (query :pointer)
   (pattern-index :uint32))
 
-(defcfun "ts_query_cursor_new" :pointer)
+(defcfun "ts_query_cursor_new" :pointer
+  "Create a new cursor for executing a given query.
+
+The cursor stores the state that is needed to iteratively search
+for matches. To use the query cursor, first call [`ts_query_cursor_exec`]
+to start running a given query on a given syntax node. Then, there are
+two options for consuming the results of the query:
+1. Repeatedly call [`ts_query_cursor_next_match`] to iterate over all of the
+   *matches* in the order that they were found. Each match contains the
+   index of the pattern that matched, and an array of captures. Because
+   multiple patterns can match the same set of nodes, one match may contain
+   captures that appear *before* some of the captures from a previous match.
+2. Repeatedly call [`ts_query_cursor_next_capture`] to iterate over all of the
+   individual *captures* in the order that they appear. This is useful if
+   don't care about which pattern matched, and just want a single ordered
+   sequence of captures.
+
+If you don't care about consuming all of the results, you can stop calling
+[`ts_query_cursor_next_match`] or [`ts_query_cursor_next_capture`] at any point.
+ You can then start executing another query on another node by calling
+ [`ts_query_cursor_exec`] again.")
 
 (defcfun "ts_query_cursor_delete" :void
   "Delete a query cursor, freeing all of the memory that it used."
   (query-cursor :pointer))
 
-;; TODO
-(defcfun "ts_query_cursor_exec" :void
-  "Start running a given query on a given node.")
+(defcfun ("ts_query_cursor_exec_" ts-query-cursor-exec) :void
+  "Start running a given query on a given node."
+  (query-cursor :pointer)
+  (query :pointer)
+  (node :pointer))
 
 (defcfun "ts_query_cursor_did_exceed_match_limit" :bool
   "Manage the maximum number of in-progress matches allowed by this query
@@ -934,7 +1008,6 @@ will be executed."
   (start-byte :uint32)
   (end-byte :uint32))
 
-;; TODO
 (defcfun "ts_query_cursor_set_point_range" :void
   (query-cursor :pointer)
   (start-point :pointer)
@@ -976,12 +1049,6 @@ may be searched at any depth what defined by the pattern structure.
 Set to `UINT32_MAX` to remove the maximum start depth."
   (query-cursor :pointer)
   (max-start-depth :uint32))
-
-;; TODO
-;; (defcfun "ts_query_cursor_exec" :void
-;;   (query-cursor :pointer)
-;;   (query :pointer)
-;;   (node :pointer))
 
 ;**********************;
 ;* Section - Language *;
