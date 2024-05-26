@@ -2,6 +2,33 @@
 #include <stdlib.h>
 #include <tree_sitter/api.h>
 
+/*******************/
+/* Section - Point */
+/*******************/
+
+TSPoint *ts_point_new(uint32_t row, uint32_t column)
+{
+	TSPoint *point = malloc(sizeof(TSPoint));
+	if (point)
+		*point = (TSPoint){ .row = row, .column = column };
+	return point;
+}
+
+uint32_t ts_point_row(TSPoint *self)
+{
+	return self->row;
+}
+
+uint32_t ts_point_column(TSPoint *self)
+{
+	return self->column;
+}
+
+void ts_point_delete(TSPoint *self)
+{
+	free(self);
+}
+
 /******************/
 /* Section - Tree */
 /******************/
@@ -16,12 +43,12 @@ TSNode *ts_tree_root_node_(const TSTree *self)
 
 TSNode *ts_tree_root_node_with_offset_(const TSTree *self,
 				       uint32_t offset_bytes,
-				       TSPoint offset_extent)
+				       TSPoint *offset_extent)
 {
 	TSNode *node = malloc(sizeof(TSNode));
 	if (node)
 		*node = ts_tree_root_node_with_offset(self, offset_bytes,
-						      offset_extent);
+						      *offset_extent);
 	return node;
 }
 
@@ -59,9 +86,12 @@ uint32_t ts_node_start_byte_(TSNode *self)
 	return ts_node_start_byte(*self);
 }
 
-TSPoint ts_node_start_point_(TSNode *self)
+TSPoint *ts_node_start_point_(TSNode *self)
 {
-	return ts_node_start_point(*self);
+	TSPoint *point = malloc(sizeof(TSPoint));
+	if (point)
+		*point = ts_node_start_point(*self);
+	return point;
 }
 
 uint32_t ts_node_end_byte_(TSNode *self)
@@ -69,9 +99,12 @@ uint32_t ts_node_end_byte_(TSNode *self)
 	return ts_node_end_byte(*self);
 }
 
-TSPoint ts_node_end_point_(TSNode *self)
+TSPoint *ts_node_end_point_(TSNode *self)
 {
-	return ts_node_end_point(*self);
+	TSPoint *point = malloc(sizeof(TSPoint));
+	if (point)
+		*point = ts_node_end_point(*self);
+	return point;
 }
 
 char *ts_node_string_(TSNode *self)
@@ -241,12 +274,12 @@ TSNode *ts_node_descendant_for_byte_range_(TSNode *self, uint32_t start,
 	return node;
 }
 
-TSNode *ts_node_descendant_for_point_range_(TSNode *self, TSPoint start,
-					    TSPoint end)
+TSNode *ts_node_descendant_for_point_range_(TSNode *self, TSPoint *start,
+					    TSPoint *end)
 {
 	TSNode *node = malloc(sizeof(TSNode));
 	if (node)
-		*node = ts_node_descendant_for_point_range(*self, start, end);
+		*node = ts_node_descendant_for_point_range(*self, *start, *end);
 	return node;
 }
 
@@ -260,13 +293,13 @@ TSNode *ts_node_named_descendant_for_byte_range_(TSNode *self, uint32_t start,
 	return node;
 }
 
-TSNode *ts_node_named_descendant_for_point_range_(TSNode *self, TSPoint start,
-						  TSPoint end)
+TSNode *ts_node_named_descendant_for_point_range_(TSNode *self, TSPoint *start,
+						  TSPoint *end)
 {
 	TSNode *node = malloc(sizeof(TSNode));
 	if (node)
-		*node = ts_node_named_descendant_for_point_range(*self, start,
-								 end);
+		*node = ts_node_named_descendant_for_point_range(*self, *start,
+								 *end);
 	return node;
 }
 
@@ -303,4 +336,26 @@ TSNode *ts_tree_cursor_current_node_(const TSTreeCursor *self)
 	if (node)
 		*node = ts_tree_cursor_current_node(self);
 	return node;
+}
+
+uint64_t ts_tree_cursor_goto_first_child_for_point_(TSTreeCursor *self,
+						    TSPoint *goal_point)
+{
+	return ts_tree_cursor_goto_first_child_for_point(self, *goal_point);
+}
+
+/*******************/
+/* Section - Query */
+/*******************/
+
+void ts_query_cursor_exec_(TSQueryCursor *self, const TSQuery *query,
+			   TSNode *node)
+{
+	ts_query_cursor_exec(self, query, *node);
+}
+
+void ts_query_cursor_set_point_range_(TSQueryCursor *self, TSPoint *start_point,
+				      TSPoint *end_point)
+{
+	ts_query_cursor_set_point_range(self, *start_point, *end_point);
 }
