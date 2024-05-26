@@ -70,10 +70,16 @@
     :initform #'foreign-free
     :accessor free)))
 
+(defparameter *alloced* 0)
+(defparameter *freed* 0)
+
 (defmethod initialize-instance :after ((self foreign-object) &key &allow-other-keys)
+  (incf *alloced*)
   (let ((pointer (slot-value self 'pointer))
         (free (slot-value self 'free)))
-    (tg:finalize self (lambda () (funcall free pointer)))))
+    (tg:finalize self (lambda ()
+                        (incf *freed*)
+                        (funcall free pointer)))))
 
 (defclass language (foreign-object) ())
 (defclass parser (foreign-object) ())
@@ -128,7 +134,9 @@
           (if offset
               (ts-tree-root-node-with-offset (pointer tree) offset (null-pointer))
               (ts-tree-root-node (pointer tree)))))
-    (make-instance 'node :pointer pointer)))
+    (make-instance 'node
+                   :free #'ts-node-delete
+                   :pointer pointer)))
 
 (defun tree-language (tree)
   (make-instance 'language
@@ -197,19 +205,27 @@
   (ts-node-is-error (pointer node)))
 
 (defun node-parent (node)
-  (make-instance 'node :pointer (ts-node-parent (pointer node))))
+  (make-instance 'node
+                 :free #'ts-node-delete
+                 :pointer (ts-node-parent (pointer node))))
 
 (defun node-child (node index)
-  (make-instance 'node :pointer (ts-node-child (pointer node) index)))
+  (make-instance 'node
+                 :free #'ts-node-delete
+                 :pointer (ts-node-child (pointer node) index)))
 
 (defun node-child-count (node)
   (ts-node-child-count (pointer node)))
 
 (defun node-next-sibling (node)
-  (make-instance 'node :pointer (ts-node-next-sibling (pointer node))))
+  (make-instance 'node
+                 :free #'ts-node-delete
+                 :pointer (ts-node-next-sibling (pointer node))))
 
 (defun node-prev-sibling (node)
-  (make-instance 'node :pointer (ts-node-prev-sibling (pointer node))))
+  (make-instance 'node
+                 :free #'ts-node-delete
+                 :pointer (ts-node-prev-sibling (pointer node))))
 
 (defun node-eq (node other)
   (ts-node-eq (pointer node) other))
@@ -227,7 +243,9 @@
   (ts-tree-cursor-reset (pointer cursor) (pointer node)))
 
 (defun cursor-node (cursor)
-  (make-instance 'node :pointer (ts-tree-cursor-current-node (pointer cursor))))
+  (make-instance 'node
+                 :free #'ts-node-delete
+                 :pointer (ts-tree-cursor-current-node (pointer cursor))))
 
 (defun cursor-field-name (cursor)
   (ts-tree-cursor-current-field-name (pointer cursor)))

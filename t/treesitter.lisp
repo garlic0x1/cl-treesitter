@@ -20,8 +20,9 @@
        (ts:parser-parse-string parser "1+1;"))))))
 
 (defun memtest ()
-  (dotimes (i 400000)
+  (dotimes (i 1000000)
     (let* ((parser (ts:make-parser :language *c-lang*)))
       (ts:node-string
        (ts:tree-root-node
-        (ts:parser-parse-string parser "1+1;"))))))
+        (ts:parser-parse-string parser "1+1;")))))
+  (tg:gc :full t))
