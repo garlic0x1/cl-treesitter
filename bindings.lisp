@@ -115,6 +115,34 @@
    :ts-tree-cursor-current-depth
    :ts-tree-cursor-goto-first-child-for-byte
    :ts-tree-cursor-goto-first-child-for-point
+   ;; query
+   :ts-query-new
+   :ts-query-delete
+   :ts-query-pattern-count
+   :ts-query-capture-count
+   :ts-query-string-count
+   :ts-query-start-byte-for-pattern
+   :ts-query-predicates-for-pattern
+   :ts-query-is-pattern-rooted
+   :ts-query-is-pattern-non-local
+   :ts-query-is-pattern-guaranteed-at-step
+   :ts-query-capture-name-for-id
+   :ts-query-capture-capture-quantifier-for-id
+   :ts-query-capture-capture-string-value-id
+   :ts-query-disable-capture
+   :ts-query-disable-pattern
+   :ts-query-cursor-new
+   :ts-query-cursor-delete
+   :ts-query-cursor-exec
+   :ts-query-cursor-did-exceed-match-limit
+   :ts-query-cursor-match-limit
+   :ts-query-cursor-set-match-limit
+   :ts-query-cursor-set-byte-range
+   :ts-query-cursor-set-point-range
+   :ts-query-cursor-next-match
+   :ts-query-cursor-remove-match
+   :ts-query-cursor-next-capture
+   :ts-query-cursor-set-max-start-depth
    ;; language
    :ts-language-copy
    :ts-language-delete
@@ -833,7 +861,7 @@ if no such child was found."
 ;* Section - Query */
 ;*******************/
 
-(defcfun "ts_query_new" :pointer
+(defun ts-query-new (language source error-offset error-type)
   "Create a new query from a string containing one or more S-expression
 patterns. The query is associated with a particular language, and can
 only be run on syntax nodes parsed with that language.
@@ -843,11 +871,13 @@ If a pattern is invalid, this returns `NULL`, and provides two pieces
 of information about the problem:
 1. The byte offset of the error is written to the `error_offset` parameter.
 2. The type of error is written to the `error_type` parameter."
-  (language :pointer)
-  (source :string)
-  (source-len :uint32)
-  (error-offset :pointer)
-  (error-type :pointer))
+  (foreign-funcall "ts_query_new"
+                   :pointer language
+                   :string source
+                   :uint32 (length source)
+                   :pointer error-offset
+                   :pointer error-type
+                   :pointer))
 
 (defcfun "ts_query_delete" :void
   "Delete a query, freeing all of the memory that it used."
@@ -932,15 +962,17 @@ with a numeric id based on the order that it appeared in the query's source."
   (index :uint32)
   (length :pointer))
 
-(defcfun "ts_query_disable_capture" :void
+(defun ts-query-disable-capture (query name)
   "Disable a certain capture within a query.
 
 This prevents the capture from being returned in matches, and also avoids
 any resource usage associated with recording the capture. Currently, there
 is no way to undo this."
-  (query :pointer)
-  (name :string)
-  (length :uint32))
+  (foreign-funcall "ts_query_disable_capture"
+                   :pointer query
+                   :string name
+                   :uint32 (length name)
+                   :void))
 
 (defcfun "ts_query_disable_pattern" :void
   "Disable a certain pattern within a query.
