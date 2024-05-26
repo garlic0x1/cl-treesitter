@@ -829,6 +829,160 @@ if no such child was found."
   (cursor (:pointer (:struct ts-tree-cursor)))
   (goal-point (:pointer (:struct ts-point))))
 
+;*******************/
+;* Section - Query */
+;*******************/
+
+(defcfun "ts_query_new" :pointer
+  (language :pointer)
+  (source :string)
+  (source-len :uint32)
+  (error-offset :pointer)
+  (error-type :pointer))
+
+(defcfun "ts_query_delete" :void
+  (query :pointer))
+
+(defcfun "ts_query_pattern_count" :uint32
+  (query :pointer))
+
+(defcfun "ts_query_capture_count" :uint32
+  (query :pointer))
+
+(defcfun "ts_query_string_count" :uint32
+  (query :pointer))
+
+(defcfun "ts_query_start_byte_for_pattern" :uint32
+  (query :pointer)
+  (pattern-index :uint32))
+
+(defcfun "ts_query_predicates_for_pattern" :pointer
+  (query :pointer)
+  (pattern-index :uint32)
+  (step-count :uint32))
+
+(defcfun "ts_query_is_pattern_rooted" :bool
+  (query :pointer)
+  (pattern-index :uint32))
+
+(defcfun "ts_query_is_pattern_non_local" :bool
+  (query :pointer)
+  (pattern-index :uint32))
+
+(defcfun "ts_query_is_pattern_guaranteed_at_step" :bool
+  (query :pointer)
+  (byte-offset :uint32))
+
+(defcfun "ts_query_capture_name_for_id" :string
+  (query :pointer)
+  (index :uint32)
+  (length :pointer))
+
+;; TODO
+;; (defcfun "ts_query_capture_capture_quantifier_for_id" :string
+;;   (query :pointer)
+;;   (index :uint32)
+;;   (length :pointer))
+
+(defcfun "ts_query_capture_string_value_for_id" :string
+  (query :pointer)
+  (index :uint32)
+  (length :pointer))
+
+(defcfun "ts_query_disable_capture" :void
+  (query :pointer)
+  (name :string)
+  (length :uint32))
+
+(defcfun "ts_query_disable_pattern" :void
+  (query :pointer)
+  (pattern-index :uint32))
+
+(defcfun "ts_query_cursor_new" :pointer)
+
+(defcfun "ts_query_cursor_delete" :void
+  "Delete a query cursor, freeing all of the memory that it used."
+  (query-cursor :pointer))
+
+;; TODO
+(defcfun "ts_query_cursor_exec" :void
+  "Start running a given query on a given node.")
+
+(defcfun "ts_query_cursor_did_exceed_match_limit" :bool
+  "Manage the maximum number of in-progress matches allowed by this query
+cursor.
+
+Query cursors have an optional maximum capacity for storing lists of
+in-progress captures. If this capacity is exceeded, then the
+earliest-starting match will silently be dropped to make room for further
+matches. This maximum capacity is optional — by default, query cursors allow
+any number of pending matches, dynamically allocating new space for them as
+needed as the query is executed."
+  (query-cursor :pointer))
+
+(defcfun "ts_query_cursor_match_limit" :uint32
+  (query-cursor :pointer))
+
+(defcfun "ts_query_cursor_set_match_limit" :bool
+  (query-cursor :pointer)
+  (limit :uint32))
+
+(defcfun "ts_query_cursor_set_byte_range" :void
+  "Set the range of bytes or (row, column) positions in which the query
+will be executed."
+  (query-cursor :pointer)
+  (start-byte :uint32)
+  (end-byte :uint32))
+
+;; TODO
+(defcfun "ts_query_cursor_set_point_range" :void
+  (query-cursor :pointer)
+  (start-point :pointer)
+  (end-point :pointer))
+
+(defcfun "ts_query_cursor_next_match" :bool
+  "Advance to the next match of the currently running query.
+
+If there is a match, write it to `*match` and return `true`.
+Otherwise, return `false`."
+  (query-cursor :pointer)
+  (match :pointer))
+
+(defcfun "ts_query_cursor_remove_match" :bool
+  (query-cursor :pointer)
+  (match-id :uint32))
+
+(defcfun "ts_query_cursor_next_capture" :bool
+  "Advance to the next capture of the currently running query.
+
+If there is a capture, write its match to `*match` and its index within
+the matche's capture list to `*capture_index`. Otherwise, return `false`."
+  (query-cursor :pointer)
+  (match :pointer)
+  (capture-index (:pointer :uint32)))
+
+(defcfun "ts_query_cursor_set_max_start_depth" :void
+  "Set the maximum start depth for a query cursor.
+
+This prevents cursors from exploring children nodes at a certain depth.
+Note if a pattern includes many children, then they will still be checked.
+
+The zero max start depth value can be used as a special behavior and
+it helps to destructure a subtree by staying on a node and using captures
+for interested parts. Note that the zero max start depth only limit a search
+depth for a pattern's root node but other nodes that are parts of the pattern
+may be searched at any depth what defined by the pattern structure.
+
+Set to `UINT32_MAX` to remove the maximum start depth."
+  (query-cursor :pointer)
+  (max-start-depth :uint32))
+
+;; TODO
+;; (defcfun "ts_query_cursor_exec" :void
+;;   (query-cursor :pointer)
+;;   (query :pointer)
+;;   (node :pointer))
+
 ;**********************;
 ;* Section - Language *;
 ;**********************;

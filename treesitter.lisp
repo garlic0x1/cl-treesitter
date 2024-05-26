@@ -70,6 +70,7 @@
     :initform #'foreign-free
     :accessor free)))
 
+;; gc dbg counters
 (defparameter *alloced* 0)
 (defparameter *freed* 0)
 
