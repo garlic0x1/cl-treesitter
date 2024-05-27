@@ -359,3 +359,29 @@ void ts_query_cursor_set_point_range_(TSQueryCursor *self, TSPoint *start_point,
 {
 	ts_query_cursor_set_point_range(self, *start_point, *end_point);
 }
+
+TSNode *ts_query_capture_node(TSQueryCapture *query_capture)
+{
+	TSNode *node = malloc(sizeof(TSNode));
+	if (node)
+		*node = query_capture->node;
+	return node;
+}
+
+uint32_t ts_query_capture_index(TSQueryCapture *query_capture)
+{
+	return query_capture->index;
+}
+
+TSQueryMatch *ts_query_match_new()
+{
+	TSQueryMatch *self = malloc(sizeof(TSQueryMatch));
+	if (self)
+		*self = TSQueryMatch{};
+	return self;
+}
+
+void ts_query_match_delete(TSQueryMatch *self)
+{
+	free(self);
+}

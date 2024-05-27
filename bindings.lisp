@@ -236,6 +236,12 @@
   (node (:struct ts-node))
   (index :uint32))
 
+(defcstruct ts-query-match
+  (id :uint32)
+  (pattern-index :uint16)
+  (capture-count :uint16)
+  (captures :pointer))
+
 ;*******************;
 ;* Section - Point *;
 ;*******************;
@@ -861,7 +867,7 @@ if no such child was found."
 ;* Section - Query */
 ;*******************/
 
-(defun ts-query-new (language source error-offset error-type)
+(defun ts-query-new (language source)
   "Create a new query from a string containing one or more S-expression
 patterns. The query is associated with a particular language, and can
 only be run on syntax nodes parsed with that language.
@@ -871,13 +877,17 @@ If a pattern is invalid, this returns `NULL`, and provides two pieces
 of information about the problem:
 1. The byte offset of the error is written to the `error_offset` parameter.
 2. The type of error is written to the `error_type` parameter."
-  (foreign-funcall "ts_query_new"
-                   :pointer language
-                   :string source
-                   :uint32 (length source)
-                   :pointer error-offset
-                   :pointer error-type
-                   :pointer))
+  (with-foreign-objects ((error-offset :uint32)
+                         (error-type :int))
+    (values (foreign-funcall "ts_query_new"
+                             :pointer language
+                             :string source
+                             :uint32 (length source)
+                             :pointer error-offset
+                             :pointer error-type
+                             :pointer)
+            (mem-aref error-offset :uint32)
+            (mem-aref error-type :int))))
 
 (defcfun "ts_query_delete" :void
   "Delete a query, freeing all of the memory that it used."
@@ -1081,6 +1091,13 @@ may be searched at any depth what defined by the pattern structure.
 Set to `UINT32_MAX` to remove the maximum start depth."
   (query-cursor :pointer)
   (max-start-depth :uint32))
+
+(defcfun "ts_query_match_new" :pointer
+  "Allocate an empty query match.")
+
+(defcfun "ts_query_match_delete" :void
+  "Free a query match."
+  (query-match :pointer))
 
 ;**********************;
 ;* Section - Language *;

@@ -1,5 +1,5 @@
 (defpackage :treesitter/test/bindings
-  (:use :cl :fiveam :treesitter/bindings))
+  (:use :cl :cffi :fiveam :treesitter/bindings))
 (in-package :treesitter/test/bindings)
 
 (def-suite :treesitter/bindings
@@ -42,6 +42,24 @@
       (ts-node-delete n))
     ;; cleanup
     (ts-tree-cursor-delete cursor)
+    (ts-node-delete root)
+    (ts-tree-delete tree)
+    (ts-parser-delete parser)))
+
+(test :query
+  (let* ((parser (ts-parser-new :language *c-lang*))
+         (source "int main() { return 0; }")
+         (query-string "(return_statement) @param_expression")
+         (tree (ts-parser-parse-string parser source))
+         (root (ts-tree-root-node tree))
+         (query (multiple-value-list (ts-query-new *c-lang* query-string)))
+         (qcursor (ts-query-cursor-new)))
+    (print query)
+    (print (ts-node-string root))
+    (ts-query-cursor-exec qcursor (car query) root)
+    ;; (print (ts-query-cursor-next-match ))
+    (ts-query-cursor-delete qcursor)
+    (ts-query-delete (car query))
     (ts-node-delete root)
     (ts-tree-delete tree)
     (ts-parser-delete parser)))
