@@ -377,7 +377,7 @@ TSQueryMatch *ts_query_match_new()
 {
 	TSQueryMatch *self = malloc(sizeof(TSQueryMatch));
 	if (self)
-		*self = TSQueryMatch{};
+		*self = (TSQueryMatch){};
 	return self;
 }
 
