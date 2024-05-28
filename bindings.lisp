@@ -143,6 +143,15 @@
    :ts-query-cursor-remove-match
    :ts-query-cursor-next-capture
    :ts-query-cursor-set-max-start-depth
+   :ts-query-match-new
+   :ts-query-match-delete
+   :ts-query-match-id
+   :ts-query-match-pattern-index
+   :ts-query-match-capture-count
+   :ts-query-match-capture
+   :ts-query-capture-delete
+   :ts-query-capture-node
+   :ts-query-capture-index
    ;; language
    :ts-language-copy
    :ts-language-delete
@@ -1098,6 +1107,28 @@ Set to `UINT32_MAX` to remove the maximum start depth."
 (defcfun "ts_query_match_delete" :void
   "Free a query match."
   (query-match :pointer))
+
+(defcfun "ts_query_match_id" :uint32
+  (query-match :pointer))
+
+(defcfun "ts_query_match_pattern_index" :uint16
+  (query-match :pointer))
+
+(defcfun "ts_query_match_capture_count" :uint16
+  (query-match :pointer))
+
+(defcfun "ts_query_match_capture" :pointer
+  (query-match :pointer)
+  (index :uint16))
+
+(defcfun "ts_query_capture_delete" :void
+  (query-capture :pointer))
+
+(defcfun "ts_query_capture_node" :pointer
+  (query-capture :pointer))
+
+(defcfun "ts_query_capture_index" :uint32
+  (query-capture :pointer))
 
 ;**********************;
 ;* Section - Language *;

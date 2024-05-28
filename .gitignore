@@ -5,6 +5,7 @@
 tmp/
 
 # Binaries
+a.out
 
 # Compiled objects
 *.fasl
