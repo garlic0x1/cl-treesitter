@@ -46,9 +46,16 @@ bool function_two() { return 0; }")
             (length)))))
 
 (defun memtest ()
-  (dotimes (i 1000000)
+  (dotimes (i 500000)
     (let* ((parser (ts:make-parser :language *c-lang*)))
       (ts:node-string
        (ts:tree-root-node
         (ts:parser-parse-string parser "1+1;")))))
+  (dotimes (i 5000)
+    (line-up-first
+     (ts:make-parser :language *c-lang*)
+     (ts:parser-parse-string "int func() { return 0; return 1; }")
+     (ts:tree-root-node)
+     (ts:query "(return_statement) @x")
+     (length)))
   (tg:gc :full t))

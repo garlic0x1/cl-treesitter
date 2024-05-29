@@ -296,10 +296,13 @@
 ;* Section - Query */
 ;*******************/
 
-(defun make-query (language string)
-  (make-instance 'query
-                 :free #'ts-query-delete
-                 :pointer (ts-query-new language string)))
+(defgeneric make-query (language string)
+  (:method ((language foreign-object) string)
+    (make-query (pointer language) string))
+  (:method ((language t) string)
+    (make-instance 'query
+                   :free #'ts-query-delete
+                   :pointer (ts-query-new language string))))
 
 (defun make-query-cursor ()
   (make-instance 'query-cursor
@@ -313,7 +316,7 @@
 
 (defun for-query-cursor-nodes (qcursor proc)
   (let* ((match (ts-query-match-new)))
-    (loop :for continue := (ts-query-cursor-next-match qcursor match)
+    (loop :for continue := (ts-query-cursor-next-match (pointer qcursor) match)
           :while continue
           :do (loop :for i :from 0 :to (1- (ts-query-match-capture-count match))
                     :for capture := (ts-query-match-capture match i)
@@ -325,18 +328,20 @@
                     :do (ts-query-capture-delete capture)))
     (ts-query-match-delete match)))
 
-(defun query (node query-string)
-  (let ((query (ts-query-new (ts-node-language (pointer node)) query-string))
-        (cursor (ts-query-cursor-new))
-        (acc))
-    (unwind-protect
-         (progn
-           (ts-query-cursor-exec cursor query (pointer node))
-           (if (eq :none (ts-query-error-type query))
-               (for-query-cursor-nodes cursor (lambda (node) (push node acc)))
-               (error (format nil "Failure, type: ~a, offset: ~a"
-                              (ts-query-error-type query)
-                              (ts-query-error-offset query))))))
-    (ts-query-cursor-delete cursor)
-    (ts-query-delete query)
+(defun query-cursor-nodes (qcursor)
+  (let ((acc))
+    (for-query-cursor-nodes qcursor (lambda (node) (push node acc)))
     acc))
+
+(defun ensure-query-valid (query)
+  (unless (eq :none (ts-query-error-type (pointer query)))
+    (error (format nil "Failure, type: ~a, offset: ~a"
+                   (ts-query-error-type (pointer query))
+                   (ts-query-error-offset (pointer query))))))
+
+(defun query (node query-string)
+  (let ((query (make-query (node-language node) query-string))
+        (qcursor (make-query-cursor)))
+    (query-cursor-exec qcursor query node)
+    (ensure-query-valid query)
+    (query-cursor-nodes qcursor)))

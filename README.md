@@ -6,7 +6,12 @@ The high level API, in the namespace `treesitter` (nicknamed `ts` here),
 is garbage collected using finalizers and tries to make treesitter "lispier".
 
 ```lisp
-;; load a language grammar
+(defpackage :ts-demo
+  (:use :cl :alexandria-2)
+  (:local-nicknames (:ts :treesitter)))
+(in-package :ts-demo)
+
+;; load a language grammar (see below)
 (cffi:use-foreign-library "libtree-sitter-c.so")
 (cffi:defcfun "tree_sitter_c" :pointer)
 (defvar *c-lang* (tree-sitter-c))
@@ -44,3 +49,16 @@ must be manually freed with the `ts-*-delete` functions.
   (ts-tree-delete tree)
   (ts-parser-delete parser))
 ```
+
+# Languages
+
+To use various languages, simply use the foreign library that provides it.
+For example, to use C:
+
+```lisp
+(cffi:use-foreign-library "libtree-sitter-c.so")
+(cffi:defcfun "tree_sitter_c" :pointer)
+(defvar *c-lang* (tree-sitter-c))
+```
+
+I will probably add an "easy" function for this.

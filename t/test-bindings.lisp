@@ -12,21 +12,21 @@
 
 (test :basic
   "Ensure parsing strings works."
-  ;; allocs
+  ;; alloc
   (let* ((parser (ts-parser-new :language *c-lang*))
          (tree (ts-parser-parse-string parser "1 + 1;"))
          (root (ts-tree-root-node tree)))
     (is (equal
          "(translation_unit (expression_statement (update_expression argument: (binary_expression left: (number_literal) right: (number_literal)) operator: (MISSING \"--\"))))"
          (ts-node-string root)))
-    ;; cleanup
+    ;; free
     (ts-node-delete root)
     (ts-tree-delete tree)
     (ts-parser-delete parser)))
 
 (test :cursor
   "Test creating and moving a cursor."
-  ;; allocs
+  ;; alloc
   (let* ((parser (ts-parser-new :language *c-lang*))
          (tree (ts-parser-parse-string parser "bool test_cursors(539);"))
          (root (ts-tree-root-node tree))
@@ -34,19 +34,20 @@
     (ts-tree-cursor-goto-first-child cursor)
     (ts-tree-cursor-goto-first-child cursor)
     (is (equal "type" (ts-tree-cursor-current-field-name cursor)))
-    ;; alloc node
+    ;; alloc
     (let ((n (ts-tree-cursor-current-node cursor)))
       (is (equal "primitive_type"
                  (ts-language-symbol-name *c-lang* (ts-node-symbol n))))
-      ;; cleanup
+      ;; free
       (ts-node-delete n))
-    ;; cleanup
+    ;; free
     (ts-tree-cursor-delete cursor)
     (ts-node-delete root)
     (ts-tree-delete tree)
     (ts-parser-delete parser)))
 
 (test :query
+  ;; alloc
   (let* ((parser (ts-parser-new :language *c-lang*))
          (source "int main() { return 0; }")
          (query-string "(return_statement) @param_expression")
@@ -55,15 +56,20 @@
          (query (ts-query-new *c-lang* query-string))
          (qcursor (ts-query-cursor-new)))
     (ts-query-cursor-exec qcursor query root)
+    ;; alloc
     (let ((match (ts-query-match-new)))
       (is (ts-query-cursor-next-match qcursor match))
+      ;; alloc
       (let* ((capture (ts-query-match-capture match 0))
              (node (ts-query-capture-node capture)))
         (is (equal "(return_statement (number_literal))" (ts-node-string node)))
         (is (equal :none (ts-query-error-type query)))
+        ;; free
         (ts-node-delete node)
         (ts-query-capture-delete capture))
+      ;; free
       (ts-query-match-delete match))
+    ;; free
     (ts-query-cursor-delete qcursor)
     (ts-query-delete query)
     (ts-node-delete root)

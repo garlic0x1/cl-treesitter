@@ -525,16 +525,3 @@ void ts_query_capture_delete(TSQueryCapture *self)
 {
 	free(self);
 }
-
-// TSNode *ts_query_capture_node(TSQueryCapture *self)
-// {
-// 	TSNode *node = malloc(sizeof(TSNode));
-// 	if (node)
-// 		*node = self->node;
-// 	return node;
-// }
-
-// uint32_t ts_query_capture_index(TSQueryCapture *self)
-// {
-// 	return self->index;
-// }
