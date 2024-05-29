@@ -1,5 +1,5 @@
 (defpackage :treesitter/test
-  (:use :cl :fiveam)
+  (:use :cl :alexandria-2 :fiveam)
   (:local-nicknames (:ts :treesitter)))
 (in-package :treesitter/test)
 
@@ -37,7 +37,13 @@ bool function_two() { return 0; }")
          (tree (ts:parser-parse-string parser *query-code*))
          (root (ts:tree-root-node tree))
          (results (ts:query root "(return_statement) @param_expression")))
-    (is (= 2 (length results)))))
+    (is (= 2 (length results))))
+  (is (= 2 (line-up-first
+            (ts:make-parser :language *c-lang*)
+            (ts:parser-parse-string "int func() { return 0; return 1; }")
+            (ts:tree-root-node)
+            (ts:query "(return_statement) @x")
+            (length)))))
 
 (defun memtest ()
   (dotimes (i 1000000)

@@ -19,7 +19,7 @@
                (:file "treesitter")))
 
 (asdf:defsystem "treesitter/test"
-  :depends-on (:fiveam :treesitter)
+  :depends-on (:alexandria :fiveam :treesitter)
   :components ((:module "t"
                 :components ((:file "bindings")
                              (:file "treesitter")))))
