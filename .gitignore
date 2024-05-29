@@ -4,6 +4,9 @@
 *.log
 tmp/
 
+# reference
+include/
+
 # Binaries
 a.out
 

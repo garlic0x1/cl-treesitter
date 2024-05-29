@@ -1,8 +1,28 @@
 Common Lisp bindings for libtree-sitter
 
-These are low-level bindings, you need to clean up resources with the `ts-*-delete` functions after creating them.
+There are two APIs, the package `:treesitter/bindings` has low-level C bindings
+with manual memory management, you need to clean up any resources you create with
+the `ts-*-delete` functions.
+
+The package `:treesitter` provides a garbage collected API using finalizers, and
+it has a "lispier" interface.
 
 # Example
+
+Here is the high-level API:
+
+```lisp
+(cffi:use-foreign-library "libtree-sitter-c.so")
+(cffi:defcfun "tree_sitter_c" :pointer)
+(defvar *c-lang* (tree-sitter-c))
+
+(let ((parser (ts:make-parser :language *c-lang*)))
+  (ts:node-string
+   (ts:tree-root-node
+    (ts:parser-parse-string parser "1+1;"))))
+```
+
+Here is the low-level API:
 
 ```lisp
 (cffi:use-foreign-library "libtree-sitter-c.so")
