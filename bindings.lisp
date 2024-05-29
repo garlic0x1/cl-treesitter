@@ -118,6 +118,7 @@
    ;; query
    :ts-query-new
    :ts-query-delete
+   :ts-query-error-offset
    :ts-query-error-type
    :ts-query-pattern-count
    :ts-query-capture-count
@@ -909,6 +910,9 @@ of information about the problem:
     (4 :capture)
     (5 :structure)
     (6 :language)))
+
+(defcfun "ts_query_error_offset" :uint32
+  (query :pointer))
 
 (defcfun ("ts_query_pattern_count_" ts-query-pattern-count) :uint32
   "Get the number of patterns, captures, or string literals in the query."

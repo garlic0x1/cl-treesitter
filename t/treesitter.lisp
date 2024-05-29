@@ -17,10 +17,7 @@
     (is
      (ts:node-string
       (ts:tree-root-node
-       (ts:parser-parse-string parser "1+1;"))))
-    (let ((root (ts:make-cursor
-                 (ts:tree-root-node
-                  (ts:parser-parse-string parser "a(b() + 12) - 1"))))))))
+       (ts:parser-parse-string parser "1+1;"))))))
 
 (test :cursor
   (let* ((parser (ts:make-parser :language *c-lang*))
@@ -30,6 +27,17 @@
     (ts:cursor-goto-first-child cursor)
     (ts:cursor-goto-first-child cursor)
     (is (equal 2 (ts:cursor-depth cursor)))))
+
+(defparameter *query-code*
+  "int function_one() { return 12; }
+bool function_two() { return 0; }")
+
+(test :query
+  (let* ((parser (ts:make-parser :language *c-lang*))
+         (tree (ts:parser-parse-string parser *query-code*))
+         (root (ts:tree-root-node tree))
+         (results (ts:query root "(return_statement) @param_expression")))
+    (is (= 2 (length results)))))
 
 (defun memtest ()
   (dotimes (i 1000000)

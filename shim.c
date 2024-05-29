@@ -354,6 +354,11 @@ typedef struct {
 	TSQueryError error_type;
 } TSQuery_;
 
+uint32_t ts_query_error_offset(TSQuery_ *self)
+{
+	return self->error_offset;
+}
+
 TSQueryError ts_query_error_type(TSQuery_ *self)
 {
 	return self->error_type;

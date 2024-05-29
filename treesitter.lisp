@@ -57,6 +57,8 @@
    :cursor-depth
    :cursor-goto-first-child-for-byte
    :cursor-goto-first-child-for-point
+   ;; query
+   :query
    ))
 (in-package :treesitter)
 
@@ -88,6 +90,8 @@
 (defclass node (foreign-object) ())
 (defclass tree (foreign-object) ())
 (defclass cursor (foreign-object) ())
+(defclass query (foreign-object) ())
+(defclass query-cursor (foreign-object) ())
 
 ;********************;
 ;* Section - Parser *;
@@ -287,3 +291,52 @@
    (make-instance 'point
                   :free #'ts-point-delete
                   :pointer (ts-point-new (car point) (cdr point)))))
+
+;*******************/
+;* Section - Query */
+;*******************/
+
+(defun make-query (language string)
+  (make-instance 'query
+                 :free #'ts-query-delete
+                 :pointer (ts-query-new language string)))
+
+(defun make-query-cursor ()
+  (make-instance 'query-cursor
+                 :free #'ts-query-cursor-delete
+                 :pointer (ts-query-cursor-new)))
+
+(defun query-cursor-exec (query-cursor query node)
+  (ts-query-cursor-exec (pointer query-cursor)
+                        (pointer query)
+                        (pointer node)))
+
+(defun for-query-cursor-nodes (qcursor proc)
+  (let* ((match (ts-query-match-new)))
+    (loop :for continue := (ts-query-cursor-next-match qcursor match)
+          :while continue
+          :do (loop :for i :from 0 :to (1- (ts-query-match-capture-count match))
+                    :for capture := (ts-query-match-capture match i)
+                    :for node-ptr := (ts-query-capture-node capture)
+                    :for node := (make-instance 'node
+                                                :free #'ts-node-delete
+                                                :pointer node-ptr)
+                    :do (funcall proc node)
+                    :do (ts-query-capture-delete capture)))
+    (ts-query-match-delete match)))
+
+(defun query (node query-string)
+  (let ((query (ts-query-new (ts-node-language (pointer node)) query-string))
+        (cursor (ts-query-cursor-new))
+        (acc))
+    (unwind-protect
+         (progn
+           (ts-query-cursor-exec cursor query (pointer node))
+           (if (eq :none (ts-query-error-type query))
+               (for-query-cursor-nodes cursor (lambda (node) (push node acc)))
+               (error (format nil "Failure, type: ~a, offset: ~a"
+                              (ts-query-error-type query)
+                              (ts-query-error-offset query))))))
+    (ts-query-cursor-delete cursor)
+    (ts-query-delete query)
+    acc))
