@@ -348,10 +348,112 @@ uint64_t ts_tree_cursor_goto_first_child_for_point_(TSTreeCursor *self,
 /* Section - Query */
 /*******************/
 
-void ts_query_cursor_exec_(TSQueryCursor *self, const TSQuery *query,
+typedef struct {
+	TSQuery *query;
+	uint32_t error_offset;
+	TSQueryError error_type;
+} TSQuery_;
+
+TSQuery_ *ts_query_new_(const TSLanguage *language, const char *source,
+			uint32_t source_len)
+{
+	TSQuery_ *query_ = malloc(sizeof(TSQuery_));
+	if (query_) {
+		query_->error_offset = 0;
+		query_->error_type = 0;
+		query_->query = ts_query_new(language, source, source_len,
+					     &query_->error_offset,
+					     &query_->error_type);
+	}
+	return query_;
+}
+
+void ts_query_delete_(TSQuery_ *self)
+{
+	ts_query_delete(self->query);
+	free(self);
+}
+
+uint32_t ts_query_pattern_count_(TSQuery_ *self)
+{
+	return ts_query_pattern_count(self->query);
+}
+
+uint32_t ts_query_capture_count_(TSQuery_ *self)
+{
+	return ts_query_capture_count(self->query);
+}
+
+uint32_t ts_query_string_count_(TSQuery_ *self)
+{
+	return ts_query_string_count(self->query);
+}
+
+uint32_t ts_query_start_byte_for_pattern_(TSQuery_ *self,
+					  uint32_t pattern_index)
+{
+	return ts_query_start_byte_for_pattern(self->query, pattern_index);
+}
+
+const TSQueryPredicateStep *
+ts_query_predicates_for_pattern_(TSQuery_ *self, uint32_t pattern_index,
+				 uint32_t *step_count)
+{
+	return ts_query_predicates_for_pattern(self->query, pattern_index,
+					       step_count);
+}
+
+bool ts_query_is_pattern_rooted_(TSQuery_ *self, uint32_t pattern_index)
+{
+	return ts_query_is_pattern_rooted(self->query, pattern_index);
+}
+
+bool ts_query_is_pattern_non_local_(TSQuery_ *self, uint32_t pattern_index)
+{
+	return ts_query_is_pattern_non_local(self->query, pattern_index);
+}
+
+bool ts_query_is_pattern_guaranteed_at_step_(TSQuery_ *self,
+					     uint32_t byte_offset)
+{
+	return ts_query_is_pattern_guaranteed_at_step(self->query, byte_offset);
+}
+
+const char *ts_query_capture_name_for_id_(TSQuery_ *self, uint32_t index,
+					  uint32_t *length)
+{
+	return ts_query_capture_name_for_id(self->query, index, length);
+}
+
+TSQuantifier ts_query_capture_quantifier_for_id_(TSQuery_ *self,
+						 uint32_t pattern_index,
+						 uint32_t capture_index)
+{
+	return ts_query_capture_quantifier_for_id(self->query, pattern_index,
+						  capture_index);
+}
+
+const char *ts_query_string_value_for_id_(TSQuery_ *self, uint32_t index,
+					  uint32_t *length)
+{
+	return ts_query_string_value_for_id(self->query, index, length);
+}
+
+void ts_query_disable_capture_(TSQuery_ *self, const char *name,
+			       uint32_t length)
+{
+	ts_query_disable_capture(self->query, name, length);
+}
+
+void ts_query_disable_pattern_(TSQuery_ *self, uint32_t pattern_index)
+{
+	ts_query_disable_pattern(self->query, pattern_index);
+}
+
+void ts_query_cursor_exec_(TSQueryCursor *self, const TSQuery_ *query,
 			   TSNode *node)
 {
-	ts_query_cursor_exec(self, query, *node);
+	ts_query_cursor_exec(self, query->query, *node);
 }
 
 void ts_query_cursor_set_point_range_(TSQueryCursor *self, TSPoint *start_point,

@@ -886,33 +886,28 @@ If a pattern is invalid, this returns `NULL`, and provides two pieces
 of information about the problem:
 1. The byte offset of the error is written to the `error_offset` parameter.
 2. The type of error is written to the `error_type` parameter."
-  (with-foreign-objects ((error-offset :uint32)
-                         (error-type :int))
-    (values (foreign-funcall "ts_query_new"
-                             :pointer language
-                             :string source
-                             :uint32 (length source)
-                             :pointer error-offset
-                             :pointer error-type
-                             :pointer)
-            (mem-aref error-offset :uint32)
-            (mem-aref error-type :int))))
+  (foreign-funcall "ts_query_new_"
+                   :pointer language
+                   :string source
+                   :uint32 (length source)
+                   :pointer))
 
-(defcfun "ts_query_delete" :void
+
+(defcfun ("ts_query_delete_" ts-query-delete) :void
   "Delete a query, freeing all of the memory that it used."
   (query :pointer))
 
-(defcfun "ts_query_pattern_count" :uint32
+(defcfun ("ts_query_pattern_count_" ts-query-pattern-count) :uint32
   "Get the number of patterns, captures, or string literals in the query."
   (query :pointer))
 
-(defcfun "ts_query_capture_count" :uint32
+(defcfun ("ts_query_capture_count_" ts-query-capture-count) :uint32
   (query :pointer))
 
-(defcfun "ts_query_string_count" :uint32
+(defcfun ("ts_query_string_count_" ts-query-string-count) :uint32
   (query :pointer))
 
-(defcfun "ts_query_start_byte_for_pattern" :uint32
+(defcfun ("ts_query_start_byte_for_pattern_" ts-query-start-byte-for-pattern) :uint32
   "Get the byte offset where the given pattern starts in the query's source.
 
 This can be useful when combining queries by concatenating their source
@@ -920,7 +915,7 @@ code strings."
   (query :pointer)
   (pattern-index :uint32))
 
-(defcfun "ts_query_predicates_for_pattern" :pointer
+(defcfun ("ts_query_predicates_for_pattern_" ts-query-predicates-for-pattern) :pointer
   "Get all of the predicates for the given pattern in the query.
 
 The predicates are represented as a single array of steps. There are three
@@ -939,12 +934,12 @@ the `type` field:
   (pattern-index :uint32)
   (step-count :uint32))
 
-(defcfun "ts_query_is_pattern_rooted" :bool
+(defcfun ("ts_query_is_pattern_rooted_" ts-query-is-pattern-rooted) :bool
   "Check if the given pattern in the query has a single root node."
   (query :pointer)
   (pattern-index :uint32))
 
-(defcfun "ts_query_is_pattern_non_local" :bool
+(defcfun ("ts_query_is_pattern_non_local_" ts-query-is-pattern-non-local) :bool
   "Check if the given pattern in the query is 'non local'.
 
 A non-local pattern has multiple root nodes and can match within a
@@ -954,13 +949,13 @@ when executing a query on a specific range of a syntax tree."
   (query :pointer)
   (pattern-index :uint32))
 
-(defcfun "ts_query_is_pattern_guaranteed_at_step" :bool
+(defcfun ("ts_query_is_pattern_guaranteed_at_step_" ts-query-is-pattern-guaranteed-at-step) :bool
   "Check if a given pattern is guaranteed to match once a given step is reached.
 The step is specified by its byte offset in the query's source code."
   (query :pointer)
   (byte-offset :uint32))
 
-(defcfun "ts_query_capture_name_for_id" :string
+(defcfun ("ts_query_capture_name_for_id_" ts-query-capture-name-for-id) :string
   "Get the name and length of one of the query's captures, or one of the
 query's string literals. Each capture and string is associated with a
 numeric id based on the order that it appeared in the query's source."
@@ -969,14 +964,14 @@ numeric id based on the order that it appeared in the query's source."
   (length :pointer))
 
 ;; ?
-(defcfun "ts_query_capture_capture_quantifier_for_id" :int
+(defcfun ("ts_query_capture_quantifier_for_id_" ts-query-capture-quantifier-for-id) :int
   "Get the quantifier of the query's captures. Each capture is * associated
 with a numeric id based on the order that it appeared in the query's source."
   (query :pointer)
   (pattern_index :uint32)
   (capture_index :uint32))
 
-(defcfun "ts_query_capture_string_value_for_id" :string
+(defcfun ("ts_query_capture_string_value_for_id_" ts-query-capture-string-value-for-id) :string
   (query :pointer)
   (index :uint32)
   (length :pointer))
@@ -987,13 +982,13 @@ with a numeric id based on the order that it appeared in the query's source."
 This prevents the capture from being returned in matches, and also avoids
 any resource usage associated with recording the capture. Currently, there
 is no way to undo this."
-  (foreign-funcall "ts_query_disable_capture"
+  (foreign-funcall "ts_query_disable_capture_"
                    :pointer query
                    :string name
                    :uint32 (length name)
                    :void))
 
-(defcfun "ts_query_disable_pattern" :void
+(defcfun ("ts_query_disable_pattern_" ts-query-disable-pattern) :void
   "Disable a certain pattern within a query.
 
 This prevents the pattern from matching and removes most of the overhead
