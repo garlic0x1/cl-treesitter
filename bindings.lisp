@@ -118,6 +118,7 @@
    ;; query
    :ts-query-new
    :ts-query-delete
+   :ts-query-error-type
    :ts-query-pattern-count
    :ts-query-capture-count
    :ts-query-string-count
@@ -896,6 +897,18 @@ of information about the problem:
 (defcfun ("ts_query_delete_" ts-query-delete) :void
   "Delete a query, freeing all of the memory that it used."
   (query :pointer))
+
+(defun ts-query-error-type (query)
+  (case (foreign-funcall "ts_query_error_type"
+                         :pointer query
+                         :int)
+    (0 :none)
+    (1 :syntax)
+    (2 :node-type)
+    (3 :field)
+    (4 :capture)
+    (5 :structure)
+    (6 :language)))
 
 (defcfun ("ts_query_pattern_count_" ts-query-pattern-count) :uint32
   "Get the number of patterns, captures, or string literals in the query."

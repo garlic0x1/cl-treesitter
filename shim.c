@@ -354,6 +354,11 @@ typedef struct {
 	TSQueryError error_type;
 } TSQuery_;
 
+TSQueryError ts_query_error_type(TSQuery_ *self)
+{
+	return self->error_type;
+}
+
 TSQuery_ *ts_query_new_(const TSLanguage *language, const char *source,
 			uint32_t source_len)
 {
