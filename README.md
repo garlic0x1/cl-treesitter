@@ -1,5 +1,3 @@
-Common Lisp bindings for libtree-sitter
-
 # High level
 
 The high level API, in the namespace `treesitter` (nicknamed `ts` here),
