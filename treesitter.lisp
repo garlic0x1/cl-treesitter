@@ -235,23 +235,39 @@
                  :free #'ts-node-delete
                  :pointer (ts-node-child (pointer node) index)))
 
-(defun-doc node-child-count (node) ts-node-child-count
-  (ts-node-child-count (pointer node)))
+(defun-doc node-child-count (node &key named) ts-node-child-count
+  (if named
+      (ts-node-named-child-count (pointer node))
+      (ts-node-child-count (pointer node))))
 
-(defun-doc node-next-sibling (node) ts-node-next-sibling
+(defun-doc node-next-sibling (node &key named) ts-node-next-sibling
   (make-instance 'node
                  :free #'ts-node-delete
-                 :pointer (ts-node-next-sibling (pointer node))))
+                 :pointer (if named
+                              (ts-node-next-named-sibling (pointer node))
+                              (ts-node-next-sibling (pointer node)))))
 
-(defun-doc node-prev-sibling (node) ts-node-prev-sibling
+(defun-doc node-prev-sibling (node &key named) ts-node-prev-sibling
   (make-instance 'node
                  :free #'ts-node-delete
-                 :pointer (ts-node-prev-sibling (pointer node))))
+                 :pointer (if named
+                              (ts-node-prev-named-sibling (pointer node))
+                              (ts-node-prev-sibling (pointer node)))))
 
 (defun-doc node-first-child (node byte &key named) ts-node-first-child-for-byte
   (let ((pointer (if named
                      (ts-node-first-named-child-for-byte (pointer node) byte)
                      (ts-node-first-child-for-byte (pointer node) byte))))
+    (make-instance 'node
+                   :free #'ts-node-delete
+                   :pointer pointer)))
+
+(defun-doc node-descendant-for-range (node start end &key named)
+    ts-node-descendant-for-byte-range
+  (let ((pointer
+          (if named
+              (ts-node-descendant-for-byte-range (pointer node) start end)
+              (ts-node-named-descendant-for-byte-range (pointer node) start end))))
     (make-instance 'node
                    :free #'ts-node-delete
                    :pointer pointer)))
@@ -381,7 +397,8 @@ Returns a list of nodes."
 ;* Section - Language *;
 ;**********************;
 
-(defvar *languages* (make-hash-table :test #'equal))
+(defvar *languages* (make-hash-table :test #'equal)
+  "Language constructors loaded from shared objects.")
 
 (defmacro include-language (lang)
   "Convenience macro to load treesitter language objects.
