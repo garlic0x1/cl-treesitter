@@ -66,6 +66,13 @@
    ))
 (in-package :treesitter)
 
+(defmacro defun-doc (name args function &body body)
+  "Generate docstrings from wrapped functions."
+  (let ((docstring (documentation function 'function)))
+    `(defun ,name ,args
+       ,docstring
+       ,@body)))
+
 (defclass foreign-object ()
   ((pointer
     :initarg :pointer
@@ -109,19 +116,20 @@
                                          :cancellation cancellation
                                          :logger logger)))
 
-(defun parser-language (parser)
+(defun-doc parser-language (parser) ts-parser-language
   (ts-parser-language (pointer parser)))
 
-(defun (setf parser-language) (value parser)
+(defun-doc (setf parser-language) (value parser) ts-parser-set-language
   (ts-parser-set-language (pointer parser) value))
 
-(defun parser-timeout (parser)
+(defun-doc parser-timeout (parser) ts-parser-timeout-micros
   (ts-parser-timeout-micros (pointer parser)))
 
-(defun (setf parser-timeout) (value parser)
+(defun-doc (setf parser-timeout) (value parser) ts-parser-set-timeout-micros
   (ts-parser-set-timeout-micros (pointer parser) value))
 
-(defun parser-parse-string (parser value &key (old-tree (null-pointer)) encoding)
+(defun-doc parser-parse-string (parser value &key (old-tree (null-pointer)) encoding)
+    ts-parser-parse-string
   (let ((pointer
           (if encoding
               (ts-parser-parse-string-encoded (pointer parser)
@@ -135,14 +143,14 @@
                    :free #'ts-tree-delete
                    :pointer pointer)))
 
-(defun parser-reset (parser)
+(defun-doc parser-reset (parser) ts-parser-reset
   (ts-parser-reset (pointer parser)))
 
 ;******************;
 ;* Section - Tree *;
 ;******************;
 
-(defun tree-root-node (tree &key offset)
+(defun-doc tree-root-node (tree &key offset) ts-tree-root-node
   (let ((pointer
           (if offset
               (ts-tree-root-node-with-offset (pointer tree) offset (null-pointer))
@@ -160,87 +168,87 @@
 ;* Section - Node *;
 ;******************;
 
-(defun node-type (node)
+(defun-doc node-type (node) ts-node-type
   (ts-node-type (pointer node)))
 
-(defun node-symbol (node)
+(defun-doc node-symbol (node) ts-node-symbol
   (ts-node-symbol (pointer node)))
 
-(defun node-language (node)
+(defun-doc node-language (node) ts-node-language
   (make-instance 'language
                  :free #'ts-language-delete
                  :pointer (ts-language-copy (ts-node-language (pointer node)))))
 
-(defun node-grammar-type (node)
+(defun-doc node-grammar-type (node) ts-node-grammar-type
   (ts-node-grammar-type (pointer node)))
 
-(defun node-grammar-symbol (node)
+(defun-doc node-grammar-symbol (node) ts-node-grammar-symbol
   (ts-node-grammar-symbol (pointer node)))
 
-(defun node-start-byte (node)
+(defun-doc node-start-byte (node) ts-node-start-byte
   (ts-node-start-byte (pointer node)))
 
-(defun node-end-byte (node)
+(defun-doc node-end-byte (node) ts-node-end-byte
   (ts-node-end-byte (pointer node)))
 
-(defun node-start-point (node)
+(defun-doc node-start-point (node) ts-node-start-point
   (let ((point (ts-node-start-point (pointer node))))
     (prog1 (cons (ts-point-row point) (ts-point-column point))
       (ts-point-delete point))))
 
-(defun node-end-point (node)
+(defun-doc node-end-point (node) ts-node-end-point
   (let ((point (ts-node-end-point (pointer node))))
     (prog1 (cons (ts-point-row point) (ts-point-column point))
       (ts-point-delete point))))
 
-(defun node-string (node)
+(defun-doc node-string (node) ts-node-string
   (ts-node-string (pointer node)))
 
-(defun node-null-p (node)
+(defun-doc node-null-p (node) ts-node-is-null
   (ts-node-is-null (pointer node)))
 
-(defun node-named-p (node)
+(defun-doc node-named-p (node) ts-node-is-named
   (ts-node-is-named (pointer node)))
 
-(defun node-missing-p (node)
+(defun-doc node-missing-p (node) ts-node-is-missing
   (ts-node-is-missing (pointer node)))
 
-(defun node-extra-p (node)
+(defun-doc node-extra-p (node) ts-node-is-extra
   (ts-node-is-extra (pointer node)))
 
-(defun node-has-changes (node)
+(defun-doc node-has-changes (node) ts-node-has-changes
   (ts-node-has-changes (pointer node)))
 
-(defun node-has-error (node)
+(defun-doc node-has-error (node) ts-node-has-error
   (ts-node-has-error (pointer node)))
 
-(defun node-error-p (node)
+(defun-doc node-error-p (node) ts-node-is-error
   (ts-node-is-error (pointer node)))
 
-(defun node-parent (node)
+(defun-doc node-parent (node) ts-node-parent
   (make-instance 'node
                  :free #'ts-node-delete
                  :pointer (ts-node-parent (pointer node))))
 
-(defun node-child (node index)
+(defun-doc node-child (node index) ts-node-child
   (make-instance 'node
                  :free #'ts-node-delete
                  :pointer (ts-node-child (pointer node) index)))
 
-(defun node-child-count (node)
+(defun-doc node-child-count (node) ts-node-child-count
   (ts-node-child-count (pointer node)))
 
-(defun node-next-sibling (node)
+(defun-doc node-next-sibling (node) ts-node-next-sibling
   (make-instance 'node
                  :free #'ts-node-delete
                  :pointer (ts-node-next-sibling (pointer node))))
 
-(defun node-prev-sibling (node)
+(defun-doc node-prev-sibling (node) ts-node-prev-sibling
   (make-instance 'node
                  :free #'ts-node-delete
                  :pointer (ts-node-prev-sibling (pointer node))))
 
-(defun node-first-child (node byte &key named)
+(defun-doc node-first-child (node byte &key named) ts-node-first-child-for-byte
   (let ((pointer (if named
                      (ts-node-first-named-child-for-byte (pointer node) byte)
                      (ts-node-first-child-for-byte (pointer node) byte))))
@@ -248,7 +256,7 @@
                    :free #'ts-node-delete
                    :pointer pointer)))
 
-(defun node-eq (node other)
+(defun-doc node-eq (node other) ts-node-eq
   (ts-node-eq (pointer node) other))
 
 ;************************;
@@ -260,48 +268,48 @@
                  :free #'ts-tree-cursor-delete
                  :pointer (ts-tree-cursor-new (pointer node))))
 
-(defun cursor-reset (cursor node)
+(defun-doc cursor-reset (cursor node) ts-tree-cursor-reset
   (ts-tree-cursor-reset (pointer cursor) (pointer node)))
 
-(defun cursor-node (cursor)
+(defun-doc cursor-node (cursor) ts-tree-cursor-current-node
   (make-instance 'node
                  :free #'ts-node-delete
                  :pointer (ts-tree-cursor-current-node (pointer cursor))))
 
-(defun cursor-field-name (cursor)
+(defun-doc cursor-field-name (cursor) ts-tree-cursor-current-field-name
   (ts-tree-cursor-current-field-name (pointer cursor)))
 
-(defun cursor-field-id (cursor)
+(defun-doc cursor-field-id (cursor) ts-tree-cursor-current-field-id
   (ts-tree-cursor-current-field-id (pointer cursor)))
 
-(defun cursor-goto-parent (cursor)
+(defun-doc cursor-goto-parent (cursor) ts-tree-cursor-goto-parent
   (ts-tree-cursor-goto-parent (pointer cursor)))
 
-(defun cursor-goto-next-sibling (cursor)
+(defun-doc cursor-goto-next-sibling (cursor) ts-tree-cursor-goto-next-sibling
   (ts-tree-cursor-goto-next-sibling (pointer cursor)))
 
-(defun cursor-goto-prev-sibling (cursor)
+(defun-doc cursor-goto-prev-sibling (cursor) ts-tree-cursor-goto-previous-sibling
   (ts-tree-cursor-goto-previous-sibling (pointer cursor)))
 
-(defun cursor-goto-first-child (cursor)
+(defun-doc cursor-goto-first-child (cursor) ts-tree-cursor-goto-first-child
   (ts-tree-cursor-goto-first-child (pointer cursor)))
 
-(defun cursor-goto-last-child (cursor)
+(defun-doc cursor-goto-last-child (cursor) ts-tree-cursor-goto-last-child
   (ts-tree-cursor-goto-last-child (pointer cursor)))
 
-(defun cursor-goto-descendant (cursor index)
+(defun-doc cursor-goto-descendant (cursor index) ts-tree-cursor-goto-descendant
   (ts-tree-cursor-goto-descendant (pointer cursor) index))
 
-(defun cursor-descendant-index (cursor)
+(defun-doc cursor-descendant-index (cursor) ts-tree-cursor-current-descendant-index
   (ts-tree-cursor-current-descendant-index (pointer cursor)))
 
-(defun cursor-depth (cursor)
+(defun-doc cursor-depth (cursor) ts-tree-cursor-current-depth
   (ts-tree-cursor-current-depth (pointer cursor)))
 
-(defun cursor-goto-first-child-for-byte (cursor byte)
+(defun-doc cursor-goto-first-child-for-byte (cursor byte) ts-tree-cursor-goto-first-child-for-byte
   (ts-tree-cursor-goto-first-child-for-byte (pointer cursor) byte))
 
-(defun cursor-goto-first-child-for-point (cursor point)
+(defun-doc cursor-goto-first-child-for-point (cursor point) ts-tree-cursor-goto-first-child-for-point
   (ts-tree-cursor-goto-first-child-for-point
    (pointer cursor)
    (make-instance 'point
@@ -325,7 +333,7 @@
                  :free #'ts-query-cursor-delete
                  :pointer (ts-query-cursor-new)))
 
-(defun query-cursor-exec (query-cursor query node)
+(defun-doc query-cursor-exec (query-cursor query node) ts-query-cursor-exec
   (ts-query-cursor-exec (pointer query-cursor)
                         (pointer query)
                         (pointer node)))
@@ -333,17 +341,21 @@
 (defun for-query-match-captures (qmatch proc)
   (dotimes (i (ts-query-match-capture-count qmatch))
     (let ((capture (ts-query-match-capture qmatch i)))
-      (unwind-protect
-           (let* ((ptr (ts-query-capture-node capture))
-                  (node (make-instance 'node :free #'ts-node-delete :pointer ptr)))
-             (funcall proc node))
+      (unwind-protect (funcall proc capture)
         (ts-query-capture-delete capture)))))
 
+(defun capture-node (capture)
+  (make-instance 'node
+                 :free #'ts-node-delete
+                 :pointer (ts-query-capture-node capture)))
+
 (defun for-query-cursor-nodes (qcursor proc)
-  (loop :with qmatch := (ts-query-match-new)
-        :while (ts-query-cursor-next-match (pointer qcursor) qmatch)
-        :do (for-query-match-captures qmatch proc)
-        :finally (ts-query-match-delete qmatch)))
+  (flet ((proc-capture (capture)
+           (funcall proc (capture-node capture))))
+    (loop :with qmatch := (ts-query-match-new)
+          :while (ts-query-cursor-next-match (pointer qcursor) qmatch)
+          :do (for-query-match-captures qmatch #'proc-capture)
+          :finally (ts-query-match-delete qmatch))))
 
 (defun query-cursor-nodes (qcursor)
   (let ((acc))
@@ -357,6 +369,8 @@
                    (ts-query-error-offset (pointer query))))))
 
 (defun query (node query-string)
+  "Query a node with a treesitter query string.
+Returns a list of nodes."
   (let ((query (make-query (node-language node) query-string))
         (qcursor (make-query-cursor)))
     (query-cursor-exec qcursor query node)
@@ -372,11 +386,10 @@
 (defmacro include-language (lang)
   "Convenience macro to load treesitter language objects.
 Interns a function named `tree-sitter-*` that creates a language."
-  (let ((fn-symbol
-          (intern (string-upcase (format nil "tree-sitter-~a" lang)) :treesitter)))
+  (let ((fn-symbol (intern (format nil "~:@(tree-sitter-~a~)" lang) :treesitter)))
     `(progn
-       (cffi:use-foreign-library ,(format nil "libtree-sitter-~a.so" lang))
-       (cffi:defcfun (,(format nil "tree_sitter_~a" lang) ,fn-symbol) :pointer)
+       (cffi:use-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang))
+       (cffi:defcfun (,(format nil "tree_sitter_~(~a~)" lang) ,fn-symbol) :pointer)
        (setf (gethash ,lang *languages*) (quote ,fn-symbol)))))
 
 (defun make-language (lang)
