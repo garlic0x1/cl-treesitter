@@ -11,7 +11,7 @@ is garbage collected using finalizers and tries to make treesitter "lispier".
 
 ;; load a language grammar
 (ts:include-language "c")
-(defvar *c-lang* (tree-sitter-c))
+(defvar *c-lang* (ts:make-language "c"))
 
 ;; parse to stringified node
 (let ((parser (ts:make-parser :language *c-lang*)))
@@ -56,20 +56,19 @@ must be manually freed with the `ts-*-delete` functions.
 
 # Languages
 
-To use various languages, simply use the foreign library that provides it.
-For example, to use C:
+To use various languages, simply link to the foreign library that provides it.
+
+High level interface, returns a garbage collected object:
+
+```lisp
+(ts:include-language "c")
+(defvar *c-lang* (ts:make-language "c"))
+```
+
+Low level interface, allocates and returns a pointer:
 
 ```lisp
 (cffi:use-foreign-library "libtree-sitter-c.so")
 (cffi:defcfun "tree_sitter_c" :pointer)
 (defvar *c-lang* (tree-sitter-c))
 ```
-
-The `treesitter` namespace adds a macro to make this a bit cleaner:
-
-```lisp
-(ts:include-language "c")
-(defvar *c-lang* (tree-sitter-c))
-```
-
-Keep in mind, language objects are not garbage collected for now.

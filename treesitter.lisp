@@ -40,6 +40,7 @@
    :node-child-count
    :node-next-sibling
    :node-prev-sibling
+   :node-first-child
    :node-eq
    ;; cursor
    :make-cursor
@@ -61,6 +62,7 @@
    :query
    ;; language
    :include-language
+   :make-language
    ))
 (in-package :treesitter)
 
@@ -102,7 +104,7 @@
 (defun make-parser (&key language timeout cancellation logger)
   (make-instance 'parser
                  :free #'ts-parser-delete
-                 :pointer (ts-parser-new :language language
+                 :pointer (ts-parser-new :language (pointer language)
                                          :timeout timeout
                                          :cancellation cancellation
                                          :logger logger)))
@@ -122,9 +124,13 @@
 (defun parser-parse-string (parser value &key (old-tree (null-pointer)) encoding)
   (let ((pointer
           (if encoding
-              (ts-parser-parse-string-encoded
-               (pointer parser) value encoding old-tree)
-              (ts-parser-parse-string (pointer parser) value old-tree))))
+              (ts-parser-parse-string-encoded (pointer parser)
+                                              value
+                                              encoding
+                                              old-tree)
+              (ts-parser-parse-string (pointer parser)
+                                      value
+                                      old-tree))))
     (make-instance 'tree
                    :free #'ts-tree-delete
                    :pointer pointer)))
@@ -233,6 +239,14 @@
   (make-instance 'node
                  :free #'ts-node-delete
                  :pointer (ts-node-prev-sibling (pointer node))))
+
+(defun node-first-child (node byte &key named)
+  (let ((pointer (if named
+                     (ts-node-first-named-child-for-byte (pointer node) byte)
+                     (ts-node-first-child-for-byte (pointer node) byte))))
+    (make-instance 'node
+                   :free #'ts-node-delete
+                   :pointer pointer)))
 
 (defun node-eq (node other)
   (ts-node-eq (pointer node) other))
@@ -353,9 +367,20 @@
 ;* Section - Language *;
 ;**********************;
 
+(defvar *languages* (make-hash-table :test #'equal))
+
 (defmacro include-language (lang)
   "Convenience macro to load treesitter language objects.
 Interns a function named `tree-sitter-*` that creates a language."
-  `(progn
-     (cffi:use-foreign-library ,(format nil "libtree-sitter-~a.so" lang))
-     (cffi:defcfun ,(format nil "tree_sitter_~a" lang) :pointer)))
+  (let ((fn-symbol
+          (intern (string-upcase (format nil "tree-sitter-~a" lang)) :treesitter)))
+    `(progn
+       (cffi:use-foreign-library ,(format nil "libtree-sitter-~a.so" lang))
+       (cffi:defcfun (,(format nil "tree_sitter_~a" lang) ,fn-symbol) :pointer)
+       (setf (gethash ,lang *languages*) (quote ,fn-symbol)))))
+
+(defun make-language (lang)
+  (let ((ptr (funcall (gethash lang *languages*))))
+    (make-instance 'language
+                   :free #'ts-language-delete
+                   :pointer ptr)))

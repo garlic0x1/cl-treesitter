@@ -8,7 +8,7 @@
 (in-suite :treesitter)
 
 (ts:include-language "c")
-(defvar *c-lang* (tree-sitter-c))
+(defvar *c-lang* (ts:make-language "c"))
 
 (test :basic
   "Ensure parsing strings works."
