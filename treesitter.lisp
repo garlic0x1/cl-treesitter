@@ -59,6 +59,8 @@
    :cursor-goto-first-child-for-point
    ;; query
    :query
+   ;; language
+   :include-language
    ))
 (in-package :treesitter)
 
@@ -314,19 +316,20 @@
                         (pointer query)
                         (pointer node)))
 
+(defun for-query-match-captures (qmatch proc)
+  (dotimes (i (ts-query-match-capture-count qmatch))
+    (let ((capture (ts-query-match-capture qmatch i)))
+      (unwind-protect
+           (let* ((ptr (ts-query-capture-node capture))
+                  (node (make-instance 'node :free #'ts-node-delete :pointer ptr)))
+             (funcall proc node))
+        (ts-query-capture-delete capture)))))
+
 (defun for-query-cursor-nodes (qcursor proc)
-  (let* ((match (ts-query-match-new)))
-    (loop :for continue := (ts-query-cursor-next-match (pointer qcursor) match)
-          :while continue
-          :do (loop :for i :from 0 :to (1- (ts-query-match-capture-count match))
-                    :for capture := (ts-query-match-capture match i)
-                    :for node-ptr := (ts-query-capture-node capture)
-                    :for node := (make-instance 'node
-                                                :free #'ts-node-delete
-                                                :pointer node-ptr)
-                    :do (funcall proc node)
-                    :do (ts-query-capture-delete capture)))
-    (ts-query-match-delete match)))
+  (loop :with qmatch := (ts-query-match-new)
+        :while (ts-query-cursor-next-match (pointer qcursor) qmatch)
+        :do (for-query-match-captures qmatch proc)
+        :finally (ts-query-match-delete qmatch)))
 
 (defun query-cursor-nodes (qcursor)
   (let ((acc))
@@ -345,3 +348,14 @@
     (query-cursor-exec qcursor query node)
     (ensure-query-valid query)
     (query-cursor-nodes qcursor)))
+
+;**********************;
+;* Section - Language *;
+;**********************;
+
+(defmacro include-language (lang)
+  "Convenience macro to load treesitter language objects.
+Interns a function named `tree-sitter-*` that creates a language."
+  `(progn
+     (cffi:use-foreign-library ,(format nil "libtree-sitter-~a.so" lang))
+     (cffi:defcfun ,(format nil "tree_sitter_~a" lang) :pointer)))

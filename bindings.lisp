@@ -173,7 +173,7 @@
 (use-foreign-library "libtree-sitter.so")
 
 (define-foreign-library
-    (shim :search-path (asdf:system-relative-pathname :treesitter ""))
+    (shim :search-path (asdf:system-relative-pathname :cl-treesitter ""))
   (t (:default "shim")))
 
 (use-foreign-library shim)

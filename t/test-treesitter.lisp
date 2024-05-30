@@ -7,8 +7,7 @@
   :description "Tests for the treesitter high-level API.")
 (in-suite :treesitter)
 
-(cffi:use-foreign-library "libtree-sitter-c.so")
-(cffi:defcfun "tree_sitter_c" :pointer)
+(ts:include-language "c")
 (defvar *c-lang* (tree-sitter-c))
 
 (test :basic

@@ -11,9 +11,8 @@ is garbage collected using finalizers and tries to make treesitter "lispier".
   (:local-nicknames (:ts :treesitter)))
 (in-package :ts-demo)
 
-;; load a language grammar (see below)
-(cffi:use-foreign-library "libtree-sitter-c.so")
-(cffi:defcfun "tree_sitter_c" :pointer)
+;; load a language grammar
+(ts:include-language "c")
 (defvar *c-lang* (tree-sitter-c))
 
 ;; parse to stringified node
@@ -39,7 +38,14 @@ Everything in the bindings package is prefixed with `ts-*`, and objects created
 must be manually freed with the `ts-*-delete` functions.
 
 ```lisp
-(in-package :treesitter/bindings)
+(defpackage :ts-demo-bindings
+  (:use :cl :treesitter/bindings)
+(in-package :ts-demo-bindings)
+
+;; manually load language
+(cffi:use-foreign-library "libtree-sitter-c.so")
+(cffi:defcfun "tree_sitter_c" :pointer)
+(defvar *c-lang* (tree-sitter-c))
 
 (let* ((parser (ts-parser-new :language *c-lang*))
        (tree (ts-parser-parse-string parser "1+1;"))
@@ -61,4 +67,11 @@ For example, to use C:
 (defvar *c-lang* (tree-sitter-c))
 ```
 
-I will probably add an "easy" function for this.
+The `treesitter` namespace adds a macro to make this a bit cleaner:
+
+```lisp
+(ts:include-language "c")
+(defvar *c-lang* (tree-sitter-c))
+```
+
+Keep in mind, language objects are not garbage collected for now.
