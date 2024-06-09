@@ -28,6 +28,7 @@
    :node-start-point
    :node-end-point
    :node-string
+   :node-text
    :node-null-p
    :node-named-p
    :node-missing-p
@@ -38,6 +39,7 @@
    :node-parent
    :node-child
    :node-child-count
+   :node-children
    :node-next-sibling
    :node-prev-sibling
    :node-first-child
@@ -204,6 +206,12 @@
 (defun-doc node-string (node) ts-node-string
   (ts-node-string (pointer node)))
 
+(defmethod node-text (node (source string))
+  "Extract the node text from the source."
+  (subseq source
+          (node-start-byte node)
+          (node-end-byte node)))
+
 (defun-doc node-null-p (node) ts-node-is-null
   (ts-node-is-null (pointer node)))
 
@@ -230,15 +238,22 @@
                  :free #'ts-node-delete
                  :pointer (ts-node-parent (pointer node))))
 
-(defun-doc node-child (node index) ts-node-child
+(defun-doc node-child (node index &key named) ts-node-child
   (make-instance 'node
                  :free #'ts-node-delete
-                 :pointer (ts-node-child (pointer node) index)))
+                 :pointer (if named
+                              (ts-node-named-child (pointer node) index)
+                              (ts-node-child (pointer node) index))))
 
 (defun-doc node-child-count (node &key named) ts-node-child-count
   (if named
       (ts-node-named-child-count (pointer node))
       (ts-node-child-count (pointer node))))
+
+(defun node-children (node &key named)
+  "Get all children of a node."
+  (loop :for i :from 0 :to (1- (node-child-count node :named named))
+        :collect (node-child node i :named named)))
 
 (defun-doc node-next-sibling (node &key named) ts-node-next-sibling
   (make-instance 'node
