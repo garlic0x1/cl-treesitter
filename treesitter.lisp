@@ -29,6 +29,7 @@
    :node-end-point
    :node-string
    :node-text
+   :node-name
    :node-null-p
    :node-named-p
    :node-missing-p
@@ -43,6 +44,7 @@
    :node-next-sibling
    :node-prev-sibling
    :node-first-child
+   :node-descendant-for-range
    :node-eq
    ;; cursor
    :make-cursor
@@ -63,6 +65,8 @@
    ;; query
    :query
    ;; language
+   :*languages*
+   :*language-path*
    :include-language
    :make-language
    ))
@@ -106,9 +110,9 @@
 (defclass query (foreign-object) ())
 (defclass query-cursor (foreign-object) ())
 
-;********************;
-;* Section - Parser *;
-;********************;
+;;******************;;
+;; Section - Parser ;;
+;;******************;;
 
 (defun make-parser (&key language timeout cancellation logger)
   (make-instance 'parser
@@ -148,9 +152,9 @@
 (defun-doc parser-reset (parser) ts-parser-reset
   (ts-parser-reset (pointer parser)))
 
-;******************;
-;* Section - Tree *;
-;******************;
+;;****************;;
+;; Section - Tree ;;
+;;****************;;
 
 (defun-doc tree-root-node (tree &key offset) ts-tree-root-node
   (let ((pointer
@@ -166,9 +170,9 @@
                  :free #'ts-language-delete
                  :pointer (ts-language-copy (ts-tree-language (pointer tree)))))
 
-;******************;
-;* Section - Node *;
-;******************;
+;;****************;;
+;; Section - Node ;;
+;;****************;;
 
 (defun-doc node-type (node) ts-node-type
   (ts-node-type (pointer node)))
@@ -211,6 +215,14 @@
   (subseq source
           (node-start-byte node)
           (node-end-byte node)))
+
+(defmethod node-name (node (source string))
+  (if (string= "name" (node-type node))
+      (node-text node source)
+      (loop :for child :in (node-children node)
+            :for name := (node-name child source)
+            :until name
+            :return name)))
 
 (defun-doc node-null-p (node) ts-node-is-null
   (ts-node-is-null (pointer node)))
@@ -277,12 +289,35 @@
                    :free #'ts-node-delete
                    :pointer pointer)))
 
-(defun-doc node-descendant-for-range (node start end &key named)
+(defun-doc node-descendant-for-range (node start end &key named point)
     ts-node-descendant-for-byte-range
   (let ((pointer
-          (if named
-              (ts-node-descendant-for-byte-range (pointer node) start end)
-              (ts-node-named-descendant-for-byte-range (pointer node) start end))))
+          (cond ((and (not named) (not point))
+                 (ts-node-descendant-for-byte-range (pointer node) start end))
+                ((and named (not point))
+                 (ts-node-named-descendant-for-byte-range (pointer node) start end))
+                ((and (not named) point)
+                 (ts-node-descendant-for-point-range
+                  (pointer node)
+                  (pointer (make-instance 'point
+                                          :free #'ts-point-delete
+                                          :pointer
+                                          (ts-point-new (car start) (cdr start))))
+                  (pointer (make-instance 'point
+                                          :free #'ts-point-delete
+                                          :pointer
+                                          (ts-point-new (car end) (cdr end))))))
+                ((and named point)
+                 (ts-node-named-descendant-for-point-range
+                  (pointer node)
+                  (pointer (make-instance 'point
+                                          :free #'ts-point-delete
+                                          :pointer
+                                          (ts-point-new (car start) (cdr start))))
+                  (pointer (make-instance 'point
+                                          :free #'ts-point-delete
+                                          :pointer
+                                          (ts-point-new (car end) (cdr end)))))))))
     (make-instance 'node
                    :free #'ts-node-delete
                    :pointer pointer)))
@@ -290,9 +325,9 @@
 (defun-doc node-eq (node other) ts-node-eq
   (ts-node-eq (pointer node) other))
 
-;************************;
-;* Section - TreeCursor *;
-;************************;
+;;**********************;;
+;; Section - TreeCursor ;;
+;;**********************;;
 
 (defun make-cursor (node)
   (make-instance 'cursor
@@ -347,9 +382,9 @@
                   :free #'ts-point-delete
                   :pointer (ts-point-new (car point) (cdr point)))))
 
-;*******************/
-;* Section - Query */
-;*******************/
+;;*****************;;
+;; Section - Query ;;
+;;*****************;;
 
 (defgeneric make-query (language string)
   (:method ((language foreign-object) string)
@@ -408,19 +443,23 @@ Returns a list of nodes."
     (ensure-query-valid query)
     (query-cursor-nodes qcursor)))
 
-;**********************;
-;* Section - Language *;
-;**********************;
+;;********************;;
+;; Section - Language ;;
+;;********************;;
 
 (defvar *languages* (make-hash-table :test #'equal)
   "Language constructors loaded from shared objects.")
+
+(defvar *language-path* nil
+  "Path to search for treesitter languages in.")
 
 (defmacro include-language (lang)
   "Convenience macro to load treesitter language objects.
 Interns a function named `tree-sitter-*` that creates a language."
   (let ((fn-symbol (intern (format nil "~:@(tree-sitter-~a~)" lang) :treesitter)))
     `(progn
-       (cffi:use-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang))
+       (cffi:load-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang)
+                                  :search-path *language-path*)
        (cffi:defcfun (,(format nil "tree_sitter_~(~a~)" lang) ,fn-symbol) :pointer)
        (setf (gethash ,lang *languages*) (quote ,fn-symbol)))))
 

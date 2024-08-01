@@ -178,9 +178,9 @@
 
 (use-foreign-library shim)
 
-;*******************;
-;* Section - Types *;
-;*******************;
+;;*****************;;
+;; Section - Types ;;
+;;*****************;;
 
 (defctype ts-state-id :uint16)
 (defctype ts-symbol :uint16)
@@ -253,9 +253,9 @@
   (capture-count :uint16)
   (captures :pointer))
 
-;*******************;
-;* Section - Point *;
-;*******************;
+;;*****************;;
+;; Section - Point ;;
+;;*****************;;
 
 (defcfun "ts_point_new" :pointer
   (row :uint32)
@@ -270,9 +270,9 @@
 (defcfun "ts_point_delete" :void
   (point :pointer))
 
-;********************;
-;* Section - Parser *;
-;********************;
+;;******************;;
+;; Section - Parser ;;
+;;******************;;
 
 (defun ts-parser-new (&key language timeout cancellation logger)
   "Create a new parser."
@@ -461,9 +461,9 @@ SVG output. You can turn off this logging by passing a negative number."
   (parser :pointer)
   (fd :int))
 
-;******************;
-;* Section - Tree *;
-;******************;
+;;****************;;
+;; Section - Tree ;;
+;;****************;;
 
 (defcfun "ts_tree_copy" :pointer
   "Create a shallow copy of the syntax tree. This is very fast.
@@ -529,9 +529,9 @@ given `length` pointer."
   (tree :pointer)
   (fd :int))
 
-;******************;
-;* Section - Node *;
-;******************;
+;;****************;;
+;; Section - Node ;;
+;;****************;;
 
 (defcfun ("ts_node_type_" ts-node-type) :string
   "Get the node's type as a null-terminated string."
@@ -748,9 +748,9 @@ after an edit."
   "Delete the node, freeing all of the memory that it used."
   (node (:pointer (:struct ts-node))))
 
-;************************;
-;* Section - TreeCursor *;
-;************************;
+;;**********************;;
+;; Section - TreeCursor ;;
+;;**********************;;
 
 (defcfun ("ts_tree_cursor_new_" ts-tree-cursor-new) (:pointer (:struct ts-tree-cursor))
   "Create a new tree cursor starting from the given node.
@@ -874,9 +874,9 @@ if no such child was found."
   (cursor (:pointer (:struct ts-tree-cursor)))
   (goal-point (:pointer (:struct ts-point))))
 
-;*******************/
-;* Section - Query */
-;*******************/
+;;*****************;;
+;; Section - Query ;;
+;;*****************;;
 
 (defun ts-query-new (language source)
   "Create a new query from a string containing one or more S-expression
@@ -1142,9 +1142,9 @@ Set to `UINT32_MAX` to remove the maximum start depth."
 (defcfun "ts_query_capture_index" :uint32
   (query-capture :pointer))
 
-;**********************;
-;* Section - Language *;
-;**********************;
+;;********************;;
+;; Section - Language ;;
+;;********************;;
 
 (defcfun "ts_language_copy" :pointer
   "Get another reference to the given language."
