@@ -65,6 +65,8 @@
    ;; language
    :include-language
    :make-language
+   :*tree-sitter-search-path*
+   :set-tree-sitter-search-path
    ))
 (in-package :treesitter)
 
@@ -415,12 +417,23 @@ Returns a list of nodes."
 (defvar *languages* (make-hash-table :test #'equal)
   "Language constructors loaded from shared objects.")
 
+(defvar *tree-sitter-search-path* nil)
+
+(defun set-tree-sitter-search-path (directory)
+  "Sets the tree-sitter library search path.
+   This is used as the :search-path parameter when loading the language .so"
+  (let ((dir-path (uiop:parse-native-namestring directory :ensure-directory t)))
+    (if (and (uiop:directory-pathname-p dir-path)
+             (uiop:directory-exists-p dir-path))
+        (setf *tree-sitter-search-path* dir-path)
+        (error "given path \"~a\" is not a valid directory" directory))))
+
 (defmacro include-language (lang)
   "Convenience macro to load treesitter language objects.
 Interns a function named `tree-sitter-*` that creates a language."
   (let ((fn-symbol (intern (format nil "~:@(tree-sitter-~a~)" lang) :treesitter)))
     `(progn
-       (cffi:use-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang))
+       (cffi:load-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang) :search-path *tree-sitter-search-path*)
        (cffi:defcfun (,(format nil "tree_sitter_~(~a~)" lang) ,fn-symbol) :pointer)
        (setf (gethash ,lang *languages*) (quote ,fn-symbol)))))
 
