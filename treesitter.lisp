@@ -453,13 +453,13 @@ Returns a list of nodes."
 (defvar *language-path* nil
   "Path to search for treesitter languages in.")
 
-(defmacro include-language (lang)
+(defmacro include-language (lang &key search-path)
   "Convenience macro to load treesitter language objects.
 Interns a function named `tree-sitter-*` that creates a language."
   (let ((fn-symbol (intern (format nil "~:@(tree-sitter-~a~)" lang) :treesitter)))
     `(progn
        (cffi:load-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang)
-                                  :search-path *language-path*)
+                                  :search-path (or ,search-path *language-path*))
        (cffi:defcfun (,(format nil "tree_sitter_~(~a~)" lang) ,fn-symbol) :pointer)
        (setf (gethash ,lang *languages*) (quote ,fn-symbol)))))
 
