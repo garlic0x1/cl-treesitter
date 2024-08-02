@@ -1,6 +1,6 @@
-(defpackage :treesitter/test/bindings
-  (:use :cl :cffi :fiveam :treesitter/bindings))
-(in-package :treesitter/test/bindings)
+(defpackage #:treesitter/test/bindings
+  (:use #:cl #:cffi #:fiveam #:treesitter/bindings))
+(in-package #:treesitter/test/bindings)
 
 (def-suite :treesitter/bindings
   :description "Tests for treesitter low-level bindings.")

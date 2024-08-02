@@ -1,7 +1,7 @@
-(defpackage :treesitter/test
-  (:use :cl :alexandria-2 :fiveam)
-  (:local-nicknames (:ts :treesitter)))
-(in-package :treesitter/test)
+(defpackage #:treesitter/test
+  (:use #:cl #:alexandria-2 #:fiveam)
+  (:local-nicknames (#:ts #:treesitter)))
+(in-package #:treesitter/test)
 
 (def-suite :treesitter
   :description "Tests for the treesitter high-level API.")

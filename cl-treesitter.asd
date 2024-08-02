@@ -10,7 +10,7 @@
      (format nil "~a.so" name)
      (list (format nil "~a.c" name)))))
 
-(asdf:defsystem "cl-treesitter"
+(asdf:defsystem #:cl-treesitter
   :author "garlic0x1"
   :license "MIT"
   :depends-on (:cffi :trivial-garbage)
@@ -18,7 +18,7 @@
                (:file "bindings")
                (:file "treesitter")))
 
-(asdf:defsystem "cl-treesitter/test"
+(asdf:defsystem #:cl-treesitter/test
   :depends-on (:alexandria :fiveam :cl-treesitter)
   :components ((:module "t"
                 :components ((:file "test-bindings")
