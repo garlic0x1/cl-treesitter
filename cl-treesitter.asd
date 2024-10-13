@@ -23,12 +23,14 @@
 (asdf:defsystem #:cl-treesitter
   :author "garlic0x1"
   :license "MIT"
+  :description "libtree-sitter bindings for Common Lisp"
   :depends-on (:cffi :trivial-garbage)
   :components ((:c-source-file "shim")
                (:file "bindings")
                (:file "treesitter")))
 
 (asdf:defsystem #:cl-treesitter/test
+  :description "Tests for cl-treesitter"
   :depends-on (:alexandria :fiveam :cl-treesitter)
   :components ((:module "t"
                 :components ((:file "test-bindings")
