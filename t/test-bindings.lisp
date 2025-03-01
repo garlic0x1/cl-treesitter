@@ -6,7 +6,8 @@
   :description "Tests for treesitter low-level bindings.")
 (in-suite :treesitter/bindings)
 
-(cffi:use-foreign-library "libtree-sitter-c.so")
+(cffi:use-foreign-library #-darwin "libtree-sitter-c.so"
+                          #+darwin "libtree-sitter-c.dylib")
 (cffi:defcfun "tree_sitter_c" :pointer)
 (defvar *c-lang* (tree-sitter-c))
 

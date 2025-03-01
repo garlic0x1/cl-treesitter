@@ -458,7 +458,10 @@ Returns a list of nodes."
 Interns a function named `tree-sitter-*` that creates a language."
   (let ((fn-symbol (intern (format nil "~:@(tree-sitter-~a~)" lang) :treesitter)))
     `(progn
-       (cffi:load-foreign-library ,(format nil "libtree-sitter-~(~a~).so" lang)
+       (cffi:load-foreign-library ,(format nil
+                                           #-darwin "libtree-sitter-~(~a~).so"
+                                           #+darwin "libtree-sitter-~(~a~).dylib"
+                                           lang)
                                   :search-path (or ,search-path *language-path*))
        (cffi:defcfun (,(format nil "tree_sitter_~(~a~)" lang) ,fn-symbol) :pointer)
        (setf (gethash ,lang *languages*) (quote ,fn-symbol)))))

@@ -165,11 +165,11 @@ TSNode *ts_node_parent_(TSNode *self)
 	return node;
 }
 
-TSNode *ts_node_child_containing_descendant_(TSNode *self, TSNode *descendant)
+TSNode *ts_node_child_with_descendant_(TSNode *self, TSNode *descendant)
 {
 	TSNode *node = malloc(sizeof(TSNode));
 	if (node)
-		*node = ts_node_child_containing_descendant(*self, *descendant);
+		*node = ts_node_child_with_descendant(*self, *descendant);
 	return node;
 }
 
