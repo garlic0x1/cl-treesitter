@@ -76,7 +76,7 @@
    #:ts-node-parse-state
    #:ts-node-next-parse-state
    #:ts-node-parent
-   #:ts-node-child-containint-descendant
+   #:ts-node-child-with-descendant
    #:ts-node-child
    #:ts-node-field-name-for-child
    #:ts-node-child-count
@@ -630,7 +630,7 @@ Prefer [`ts_node_child_containing_descendant`] for
 iterating over the node's ancestors."
   (node (:pointer (:struct ts-node))))
 
-(defcfun ("ts_node_child_containing_descendant_" ts-node-child-containint-descendant) (:pointer (:struct ts-node))
+(defcfun ("ts_node_child_with_descendant_" ts-node-child-with-descendant) (:pointer (:struct ts-node))
   "Get the node's child that contains `descendant`."
   (node (:pointer (:struct ts-node)))
   (descendant (:pointer (:struct ts-node))))
