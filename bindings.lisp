@@ -170,6 +170,9 @@
    ))
 (in-package #:treesitter/bindings)
 
+#+darwin
+(use-foreign-library "libtree-sitter.dylib")
+#-darwin
 (use-foreign-library "libtree-sitter.so")
 
 (define-foreign-library

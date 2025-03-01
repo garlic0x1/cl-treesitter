@@ -14,3 +14,5 @@ a.out
 *.fasl
 *.lx64fsl
 *.so
+*.dylib
+*.dylib*

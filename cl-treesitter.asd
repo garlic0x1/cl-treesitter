@@ -10,15 +10,22 @@
    (funcall (find-symbol "LOAD-SYSTEM" '#:ASDF) :cffi-toolchain))
  (error "Unable to find any system-loading mechanism."))
 
+(defparameter *ld-dll-flags*
+  #+darwin '("-I/opt/homebrew/include" "-L/opt/homebrew/lib" "-ltree-sitter")
+  #-darwin '())
+
 (defclass c-source-file (asdf:source-file) ())
 
 (defmethod asdf:perform ((op asdf:load-op) (obj c-source-file)) t)
 
 (defmethod asdf:perform ((op asdf:compile-op) (obj c-source-file))
   (with-slots ((name asdf/component:absolute-pathname)) obj
-    (cffi-toolchain:link-shared-library
-     (format nil "~a.so" name)
-     (list (format nil "~a.c" name)))))
+    (let ((cffi-toolchain:*ld-dll-flags*
+            (append cffi-toolchain:*ld-dll-flags* *ld-dll-flags*))) 
+      (cffi-toolchain:link-shared-library
+       #+darwin (format nil "~a.dylib" name)
+       #-darwin (format nil "~a.so" name)
+       (list (format nil "~a.c" name))))))
 
 (asdf:defsystem #:cl-treesitter
   :author "garlic0x1"
